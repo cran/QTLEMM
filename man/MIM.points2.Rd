@@ -102,16 +102,16 @@ searched.}
 
 \item{speed}{numeric. The walking speed of the QTL search (in cM).}
 
-\item{conv}{numeric. The convergent criterion of EM algorithm.
-The E and M steps will be iterated until a convergent criterion
+\item{conv}{numeric. The convergence criterion of EM algorithm.
+The E and M steps will be iterated until a convergence criterion
 is satisfied.}
 
 \item{console}{logical. To decide whether the process of algorithm will
 be shown in the R console or not.}
 }
 \value{
-\item{effect}{The estimated effects and LRT statistics of all searched
-positions.}
+\item{effect}{The estimated effects, log likelihood value, and LRT
+statistics of all searched positions.}
 \item{QTL.best}{The positions of the best QTL combination.}
 \item{effect.best}{The estimated effects and LRT statistics of the best
 QTL combination.}

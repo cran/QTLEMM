@@ -53,7 +53,7 @@
 #' # run and result
 #' LRTthre(marker, type = "RI", ng = 2, speed = 2, simu = 60)
 LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
-                    speed = 1, simu = 1000, d.eff = TRUE, alpha = 0.05, console = TRUE){
+                    speed = 1, simu = 1000, d.eff = FALSE, alpha = 0.05, console = TRUE){
 
   if(is.null(marker)){
     stop("Input data is missing, please cheak and fix.", call. = FALSE)

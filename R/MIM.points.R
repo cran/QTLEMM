@@ -46,15 +46,15 @@
 #' is fixed, and the position of its surrounding positions will not be
 #' searched.
 #' @param speed numeric. The walking speed of the QTL search (in cM).
-#' @param conv numeric. The convergent criterion of EM algorithm.
-#' The E and M steps will be iterated until a convergent criterion
+#' @param conv numeric. The convergence criterion of EM algorithm.
+#' The E and M steps will be iterated until a convergence criterion
 #' is satisfied.
 #' @param console logical. To decide whether the process of algorithm will
 #' be shown in the R console or not.
 #'
 #' @return
-#' \item{effect}{The estimated effects and LRT statistics of all searched
-#' positions.}
+#' \item{effect}{The estimated effects, log likelihood value, and LRT
+#' statistics of all searched positions.}
 #' \item{QTL.best}{The positions of the best QTL combination.}
 #' \item{effect.best}{The estimated effects and LRT statistics of the best
 #' QTL combination.}
@@ -205,7 +205,7 @@ MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
   }
 
   name0 <- cbind(paste("QTL", 1:nq, ".ch", sep = ""), paste("QTL", 1:nq, ".cM", sep = ""))
-  if(console){cat("#", t(name0), "LRT", "\n", sep = "\t")}
+  if(console){cat("#", t(name0), "LRT", "log.likelihood", "\n", sep = "\t")}
 
   if(method == "EM"){
     meth <- function(D.matrix, cp.matrix, y, conv){
@@ -214,7 +214,9 @@ MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
       mu0 <- as.numeric(EM$beta)
       sigma <- sqrt(as.numeric(EM$variance))
       LRT <- EM$LRT
-      result <- list(eff, mu0, sigma, LRT)
+      like <- EM$log.likelihood
+      R2 <- EM$R2
+      result <- list(eff, mu0, sigma, LRT, like, R2)
       return(result)
     }
   } else if (method == "REG"){
@@ -225,6 +227,7 @@ MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
       mu0 <- as.numeric(fit$coefficients[1])
       ms <- stats::anova(fit)$`Mean Sq`
       sigma <- ms[2]^0.5
+      R2 <- summary(fit)$r.squared
 
       L0 <- c()
       L1 <- c()
@@ -238,28 +241,31 @@ MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
         L0[k] <- sum(L00)
         L1[k] <- sum(L01)
       }
+      like0 <- sum(log(L0))
+      like1 <- sum(log(L1))
+      LRT <- 2*(like1-like0)
 
-      LRT <- -2*sum(log(L0[!is.na(L0) & !is.na(L1)]/L1[!is.na(L0) & !is.na(L1)]))
-
-      result <- list(eff, mu0, sigma, LRT)
+      result <- list(eff, mu0, sigma, LRT, like1, R2)
       return(result)
     }
   }
 
-  effect <- matrix(NA, nrow(sm), 2*nq+ncol(D.matrix)+1)
+  effect <- matrix(NA, nrow(sm), 2*nq+ncol(D.matrix)+3)
   for(i in 1:nrow(sm)){
     QTL0 <- cbind(ch0, sm[i,])
     cp0 <- Q.make(QTL0, marker, geno, type = type, ng = ng)$cp.matrix
     fit0 <- meth(D.matrix, cp0, y, conv)
-    effect0 <- c(t(QTL0), fit0[[1]], fit0[[4]])
+    effect0 <- c(t(QTL0), fit0[[1]], fit0[[4]], fit0[[5]], fit0[[6]])
 
-    if(console){cat(paste(i, "/", nrow(sm), sep = ""), t(QTL0), effect0[length(effect0)], "\n", sep = "\t")}
+    LRT <- round(effect0[length(effect0)-2], 3)
+    like <- round(effect0[length(effect0)-1], 3)
+    if(console){cat(paste(i, "/", nrow(sm), sep = ""), t(QTL0), LRT, like, "\n", sep = "\t")}
     effect[i,] <- effect0
   }
-  colnames(effect) <-  c(t(name0), colnames(D.matrix), "LRT")
+  colnames(effect) <-  c(t(name0), colnames(D.matrix), "LRT", "log.likelihood", "R2")
   row.names(effect) <- 1:nrow(effect)
 
-  best <- effect[effect[,ncol(effect)] == max(effect[,ncol(effect)]),]
+  best <- effect[effect[,ncol(effect)-1] == max(effect[,ncol(effect)-1]),]
   QTL.best <- matrix(best[1:(2*nq)], nq, 2, byrow = TRUE)
   colnames(QTL.best) <- c("chromosome", "position(cM)")
 

@@ -92,7 +92,7 @@
 #' result <- IM.search(marker, geno, y, type = "RI", ng = 2, speed = 5, conv = 10^-3, LRT.thre = 10)
 #' result$detect.QTL
 IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NULL, ng = 2, cM = TRUE,
-                      speed = 1, conv = 10^-5, d.eff = TRUE, LRT.thre = TRUE, simu = 1000, alpha = 0.05,
+                      speed = 1, conv = 10^-5, d.eff = FALSE, LRT.thre = TRUE, simu = 1000, alpha = 0.05,
                       detect = TRUE, QTLdist = 15, plot.all = TRUE, plot.cr = TRUE, console = TRUE){
 
   if(is.null(marker) | is.null(geno) | is.null(y)){
@@ -206,7 +206,8 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
       eff <- as.numeric(EM$E.vector)
       mu0 <- as.numeric(EM$beta)
       sigma <- sqrt(as.numeric(EM$variance))
-      result <- list(eff, mu0, sigma)
+      R2 <- EM$R2
+      result <- list(eff, mu0, sigma, R2)
       return(result)
     }
   } else if (method == "REG"){
@@ -217,7 +218,8 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
       mu0 <- as.numeric(fit$coefficients[1])
       ms <- stats::anova(fit)$`Mean Sq`
       sigma <- ms[2]^0.5
-      result <- list(eff, mu0, sigma)
+      R2 <- summary(fit)$r.squared
+      result <- list(eff, mu0, sigma, R2)
       return(result)
     }
   }
@@ -235,6 +237,7 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
       eff <- result[[1]]
       mu0 <- result[[2]]
       sigma <- result[[3]]
+      R2 <- result[[4]]
 
       L0 <- c()
       L1 <- c()
@@ -251,13 +254,13 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
 
       LRT <- -2*sum(log(L0[!is.na(L0) & !is.na(L1)]/L1[!is.na(L0) & !is.na(L1)]))
 
-      eff0 <- c(i, j, eff, LRT)
+      eff0 <- c(i, j, eff, LRT, R2)
       effect <- rbind(effect, eff0)
       if(console){cat(i, j, LRT, "\n", sep = "\t")}
     }
   }
   row.names(effect) <- 1:nrow(effect)
-  colnames(effect) <- c("chr", "cM", colnames(D.matrix), "LRT")
+  colnames(effect) <- c("chr", "cM", colnames(D.matrix), "LRT", "R2")
   effect <- data.frame(effect)
   effect[effect[, ncol(effect)] == Inf, 3:ncol(effect)] <- 0
 
@@ -271,7 +274,7 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   }
 
   detectQTL <- function(effect, LRT.threshold, QTLdist = 10){
-    LRT <- effect[, c(1, 2, ncol(effect))]
+    LRT <- effect[, c(1, 2, ncol(effect)-1)]
     LRT[LRT[, 3] < LRT.threshold, 3] <- 0
     det0 <- c()
     for(i in unique(LRT[, 1])){

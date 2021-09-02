@@ -72,8 +72,8 @@
 #' @param variance0 numeric. The initial value for variance. If
 #' variance0=NULL, the initial value will be the variance of
 #' phenotype values.
-#' @param conv numeric. The convergent criterion of EM algorithm.
-#' The E and M steps will be iterated until a convergent criterion
+#' @param conv numeric. The convergence criterion of EM algorithm.
+#' The E and M steps will be iterated until a convergence criterion
 #' is satisfied.
 #' @param console logical. To decide whether the process of algorithm
 #' will be shown in the R console or not.
@@ -86,7 +86,10 @@
 #' \item{variance}{The variance calculated by EM algorithm.}
 #' \item{PI.matrix}{The posterior probabilities matrix after the
 #' process of EM algorithm.}
+#' \item{log.likelihood}{The log likelihood value of this model.}
 #' \item{LRT}{The LRT statistic of this model.}
+#' \item{R2}{The coefficient of determination of this model. This
+#' can be used as an estimate of heritability.}
 #' \item{iteration.time}{The iteration time of EM algorithm.}
 #' \item{model}{The model of this analysis, which contains complete
 #' genotyping model, proposed model, truncated model, and
@@ -305,7 +308,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       if(console){
         cat("Time", "var", effectname, "\n", sep = "\t")
       }
-      while(max(abs(c(Et1-Et,sigt1-sigt))) >= conv){
+      while(max(abs(c(Et1-Et,sigt1-sigt))) >= conv & time < 1000){
         repeat{
           mut <- mut1
           Et <- Et1
@@ -316,7 +319,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
           for(j in 1:N){
             P0 <- c()
             for(i.p in 1:Qn){
-              P0[i.p] <- Freq[j, i.p]*stats::dnorm(y[j], mean = MUt[j, i.p], sd <- sigt^0.5)
+              P0[i.p] <- Freq[j, i.p]*stats::dnorm(y[j], mean = MUt[j, i.p], sd = sigt^0.5)
             }
             if(sum(P0) != 0){P0 <- P0/sum(P0)
             } else {P0 <- rep(1/g,g)}
@@ -354,15 +357,34 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
         time <- time+1
       }
       time <- time-1
-      LRT <- -2*(L0-L1)
+
+      like0 <- L0
+      like1 <- L1
+      LRT <- 2*(like1-like0)
       parameter <- c(mut1, Et1, sigt1)
+
+      y.hat <- PI%*%D.matrix%*%Et1+X%*%mut1
+      r2 <- stats::cor(y, y.hat)
 
       Et1 <- parameter[2:(1+ncol(D.matrix))]
       mut1 <- parameter[1]
       sigt1 <- parameter[length(parameter)]
       colnames(PI) <- colnames(mp)
+
+      if(time == 1000){
+        Et1 <- rep(0, length(E.vector))
+        mut1 <- 0
+        sigt1 <- 0
+        PI <- matrix(0, nrow(PI), ncol(PI))
+        like1 <- -Inf
+        LRT <- 0
+        r2 <- 0
+        warning("EM algorithm fails to converge, please check the input data or adjust the convergence criterion.")
+      }
+      r2 <- (as.numeric(r2))^2
+
       output <- list(QTL = QTL, E.vector = Et1, beta = mut1, variance = sigt1, PI.matrix = PI,
-                     LRT = LRT, iteration.time = time)
+                     log.likehood = like1, LRT = LRT, R2 = r2, iteration.time = time)
       return(output)
     }
   } else {ya <- y}
@@ -557,8 +579,8 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
                     E.vector = E.vector, X = X, beta = beta, variance = variance,
                     cp.matrix = cp.matrix, conv = conv, console = console)
     model <- "proposed model of selective genotyping"
-    result[[8]] <- model
-    names(result)[8] <- "model"
+    result[[9]] <- model
+    names(result)[9] <- "model"
   } else if (sele.g == "f"){
     if(nQTL > 1){QTL <- QTL[order(QTL[, 1], QTL[, 2]),]}
     marker <- marker[order(marker[, 1], marker[, 2]),]
@@ -566,8 +588,8 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
                     E.vector = E.vector, X = X, beta = beta, variance = variance,
                     cp.matrix = cp.matrix, conv = conv, console = console, pf = TRUE)
     model <- "population frequency-based model of selective genotyping"
-    result[[8]] <- model
-    names(result)[8] <- "model"
+    result[[9]] <- model
+    names(result)[9] <- "model"
   } else if (sele.g == "t"){
     QTL.t <- function(QTL, marker, geno, D.matrix, ys, yu, tL, tR, cM = TRUE, type = "RI", ng = 2,
                       E.vector = NULL, beta = NULL,  X=NULL, variance = NULL, cp.matrix = NULL,
@@ -676,13 +698,21 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       parameter <- c(mu0, E, sigma^2)
       time <- iter
 
-      LRT <- -2*(LL0-LL1)
+      like0 <- 2*LL0
+      like1 <- 2*LL1
+      LRT <- like1 - like0
+
       Et1 <- parameter[2:(1+ncol(D.matrix))]
       mut1 <- parameter[1]
       sigt1 <- parameter[length(parameter)]
       colnames(Pi) <- colnames(mp)
+
+      y.hat <- Pi%*%D.matrix%*%Et1+X%*%mut1
+      r2 <- stats::cor(ys, y.hat)
+      r2 <- (as.numeric(r2))^2
+
       output <- list(QTL = QTL, E.vector = Et1, beta = mut1, variance = sigt1, PI.matrix = Pi,
-                     LRT = LRT, iteration.time = time)
+                     log.likehood = like1, LRT = LRT, R2 = r2, iteration.time = time)
       return(output)
     }
 
@@ -691,11 +721,11 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
     if(is.null(tL)){tL <- min(yu)}
     if(is.null(tR)){tR <- max(yu)}
     result <- QTL.t(QTL, marker, geno, D.matrix, ys = y, yu = yu, tL, tR, cM = cM, type = type, ng = ng,
-                    E.vector = E.vector, beta = beta,  X = X, variance = variance,
+                    E.vector = E.vector, beta = beta, X = X, variance = variance,
                     cp.matrix = cp.matrix, conv = conv, console = console)
     model <- "truncated model of selective genotyping"
-    result[[8]] <- model
-    names(result)[8] <- "model"
+    result[[9]] <- model
+    names(result)[9] <- "model"
   } else {
     if(is.null(cp.matrix)){
       cp.matrix <- Q.make(QTL, marker, geno, cM = cM, type = type, ng = ng)[[(nrow(QTL)+1)]]
@@ -703,7 +733,8 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
     re <- EM.MIM(D.matrix, cp.matrix, y, E.vector0 = E.vector, X = X, beta0 = beta, variance0 = variance,
                  conv = conv, console = console)
     result <- list(QTL = QTL, E.vector = re[[1]], beta = re[[2]], variance = re[[3]], PI.matrix = re[[4]],
-                   LRT = re[[5]], iteration.time = re[[6]], model = "complete genotyping model")
+                   log.likelihood = re[[5]], LRT = re[[6]], R2 = re[[7]], iteration.time = re[[8]],
+                   model = "complete genotyping model")
   }
   names(result[[2]]) <- effectname
   return(result)

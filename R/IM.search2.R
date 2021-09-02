@@ -123,7 +123,7 @@
 #' result$detect.QTL
 IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR = NULL, method = "EM",
                        type = "RI", D.matrix = NULL, ng = 2, cM = TRUE, speed = 1, conv = 10^-5,
-                       d.eff = TRUE, LRT.thre = TRUE, simu = 1000, alpha = 0.05, detect = TRUE,
+                       d.eff = FALSE, LRT.thre = TRUE, simu = 1000, alpha = 0.05, detect = TRUE,
                        QTLdist = 15, plot.all = TRUE, plot.cr = TRUE, console = TRUE){
 
   if(is.null(marker) | is.null(geno) | is.null(y)){
@@ -266,8 +266,9 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
       mu0 <- as.numeric(EM$beta)
       sigma <- sqrt(as.numeric(EM$variance))
       LRT <- EM$LRT
+      R2 <- EM$R2
       model <- EM$model
-      result <- list(eff, mu0, sigma, LRT, model)
+      result <- list(eff, mu0, sigma, LRT, R2, model)
       return(result)
     }
     if(sele.g == "p" | sele.g == "f"){
@@ -436,6 +437,7 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
       mu0 <- as.numeric(fit$coefficients[1])
       ms <- stats::anova(fit)$`Mean Sq`
       sigma <- ms[2]^0.5
+      R2 <- summary(fit)$r.squared
 
       L0 <- c()
       L1 <- c()
@@ -451,7 +453,7 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
       }
       LRT <- -2*sum(log(L0[!is.na(L0) & !is.na(L1)]/L1[!is.na(L0) & !is.na(L1)]))
 
-      result <- list(eff, mu0, sigma, LRT, model = "regression interval mapping model")
+      result <- list(eff, mu0, sigma, LRT, R2, model = "regression interval mapping model")
       return(result)
     }
   }
@@ -469,15 +471,16 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
       mu0 <- result[[2]]
       sigma <- result[[3]]
       LRT <- result[[4]]
-      model <- result[[5]]
+      R2 <- result[[5]]
+      model <- result[[6]]
 
-      eff0 <- c(i, j, eff, LRT)
+      eff0 <- c(i, j, eff, LRT, R2)
       effect <- rbind(effect, eff0)
       if(console){cat(i, j, LRT, "\n", sep = "\t")}
     }
   }
   row.names(effect) <- 1:nrow(effect)
-  colnames(effect) <- c("chr", "cM", colnames(D.matrix), "LRT")
+  colnames(effect) <- c("chr", "cM", colnames(D.matrix), "LRT", "R2")
   effect <- data.frame(effect)
   effect[effect[, ncol(effect)] == Inf, 3:ncol(effect)] <- 0
 
@@ -492,7 +495,7 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
   }
 
   detectQTL <- function(effect, LRT.threshold, QTLdist = 10){
-    LRT <- effect[, c(1, 2, ncol(effect))]
+    LRT <- effect[, c(1, 2, ncol(effect)-1)]
     LRT[LRT[, 3] < LRT.threshold, 3] <- 0
     det0 <- c()
     for(i in unique(LRT[, 1])){

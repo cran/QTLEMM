@@ -49,8 +49,8 @@ value will be the average of y.}
 variance0=NULL, the initial value will be the variance of
 phenotype values.}
 
-\item{conv}{numeric. The convergent criterion of EM algorithm.
-The E and M steps will be iterated until a convergent criterion
+\item{conv}{numeric. The convergence criterion of EM algorithm.
+The E and M steps will be iterated until a convergence criterion
 is satisfied.}
 
 \item{console}{logical. To decide whether the process of algorithm
@@ -63,7 +63,10 @@ algorithm.}
 \item{variance}{The variance calculated by EM algorithm.}
 \item{PI.matrix}{The posterior probabilities matrix after the
 process of EM algorithm.}
+\item{log.likelihood}{The log likelihood value of this model.}
 \item{LRT}{The LRT statistic of this model.}
+\item{R2}{The coefficient of determination of this model. This
+can be used as an estimate of heritability.}
 \item{iteration.time}{The iteration time of EM algorithm.}
 }
 \description{

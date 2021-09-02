@@ -27,8 +27,8 @@
 #' @param variance0 numeric. The initial value for variance. If
 #' variance0=NULL, the initial value will be the variance of
 #' phenotype values.
-#' @param conv numeric. The convergent criterion of EM algorithm.
-#' The E and M steps will be iterated until a convergent criterion
+#' @param conv numeric. The convergence criterion of EM algorithm.
+#' The E and M steps will be iterated until a convergence criterion
 #' is satisfied.
 #' @param console logical. To decide whether the process of algorithm
 #' will be shown in the R console or not.
@@ -40,7 +40,10 @@
 #' \item{variance}{The variance calculated by EM algorithm.}
 #' \item{PI.matrix}{The posterior probabilities matrix after the
 #' process of EM algorithm.}
+#' \item{log.likelihood}{The log likelihood value of this model.}
 #' \item{LRT}{The LRT statistic of this model.}
+#' \item{R2}{The coefficient of determination of this model. This
+#' can be used as an estimate of heritability.}
 #' \item{iteration.time}{The iteration time of EM algorithm.}
 #'
 #' @export
@@ -134,14 +137,14 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
   if(console){
     cat("Time", "var", effectname, "\n", sep = "\t")
   }
-  while (max(abs(Delta)) > conv) {
+  while (max(abs(Delta)) > conv & time < 1000) {
     muji.matrix <- t(D.matrix%*%E.vector%*%matrix(1, 1, ind))+X%*%beta%*%matrix(1, 1, g)
 
     PI.matrix <- matrix(0, ind, g)
     for(j in 1:ind){
       P0 <- c()
       for(i in 1:g){
-        P0[i] <- cp.matrix[j, i]*stats::dnorm((Y[j]-muji.matrix[j, i])/sigma, 0, 1)
+        P0[i] <- cp.matrix[j, i]*stats::dnorm(Y[j], muji.matrix[j, i], sigma)
       }
       if(sum(P0) != 0){P0 <- P0/sum(P0)
       } else {P0 <- rep(1/g, g)}
@@ -196,7 +199,7 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
   for(j in 1:ind){
     P0 <- c()
     for(i in 1:g){
-      P0[i] <- cp.matrix[j, i]*stats::dnorm((Y[j]-muji.matrix[j, i])/sigma, 0, 1)
+      P0[i] <- cp.matrix[j, i]*stats::dnorm(Y[j], muji.matrix[j, i], sigma)
     }
     P0 <- P0/sum(P0)
     PI.matrix[j, ] <- P0
@@ -204,6 +207,7 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
   E.vector <- c(E.vector)
   names(E.vector) <- effectname
   colnames(PI.matrix) <- colnames(cp.matrix)
+
   variance <- sigma^2
 
   L0 <- c()
@@ -212,15 +216,31 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
     L00 <- c()
     L01 <- c()
     for(m in 1:nrow(D.matrix)){
-      L00[m] <- cp.matrix[k, m]*stats::dnorm((Y[k]-mean(X%*%beta))/sigma)
-      L01[m] <- cp.matrix[k, m]*stats::dnorm((Y[k]-(mean(X%*%beta)+D.matrix[m, ]%*%E.vector))/sigma)
+      L00[m] <- cp.matrix[k, m]*stats::dnorm(Y[k], mean(X%*%beta), sigma)
+      L01[m] <- cp.matrix[k, m]*stats::dnorm(Y[k], mean(X%*%beta)+D.matrix[m, ]%*%E.vector, sigma)
     }
     L0[k] <- sum(L00)
     L1[k] <- sum(L01)
   }
-  LRT <- -2*sum(log(L0[!is.na(L0) & !is.na(L1)]/L1[!is.na(L0) & !is.na(L1)]))
+  like0 <- sum(log(L0))
+  like1 <- sum(log(L1))
+  LRT <- 2*(like1-like0)
+  y.hat <- PI.matrix%*%D.matrix%*%E.vector+X%*%beta
+  r2 <- stats::cor(y, y.hat)
+
+  if(time == 1000){
+    E.vector <- rep(0, length(E.vector))
+    beta <- 0
+    variance <- 0
+    PI.matrix <- matrix(0, nrow(PI.matrix), ncol(PI.matrix))
+    like1 <- -Inf
+    LRT <- 0
+    r2 <- 0
+    warning("EM algorithm fails to converge, please check the input data or adjust the convergence criterion.")
+  }
+  r2 <- (as.numeric(r2))^2
 
   result <- list(E.vector = E.vector, beta = as.numeric(beta), variance = as.numeric(variance),
-                 PI.matrix = PI.matrix, LRT = LRT, iteration.time = time)
+                 PI.matrix = PI.matrix, log.likelihood = like1, LRT = LRT, R2 = r2, iteration.time = time)
   return(result)
 }

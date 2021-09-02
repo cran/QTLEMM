@@ -65,15 +65,15 @@
 #' linked significant QTL. The position near the position of the known
 #' QTLs under this distance will not be consider as the candidate position
 #' in the search process.
-#' @param conv numeric. The convergent criterion of EM algorithm.
-#' The E and M steps will be iterated until a convergent criterion
+#' @param conv numeric. The convergence criterion of EM algorithm.
+#' The E and M steps will be iterated until a convergence criterion
 #' is satisfied.
 #' @param console logical. To decide whether the process of algorithm will
 #' be shown in the R console or not.
 #'
 #' @return
-#' \item{effect}{The estimated effects and LRT statistics of all searched
-#' positions.}
+#' \item{effect}{The estimated effects, log likelihood value, and LRT
+#' statistics of all searched positions.}
 #' \item{QTL.best}{The positions of the best QTL combination.}
 #' \item{effect.best}{The estimated effects and LRT statistics of the best
 #' QTL combination.}
@@ -230,7 +230,7 @@ MIM.search2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
     D.matrix <- D.make(as.numeric(nq), type = type)
   }
 
-  if(console){cat("chr", "cM", "LRT", "known QTL", "\n", sep = "\t")}
+  if(console){cat("chr", "cM", "LRT", "log.likelihood", "known QTL", "\n", sep = "\t")}
 
   if(method == "EM"){
     meth <- function(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, conv){
@@ -241,7 +241,9 @@ MIM.search2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
       sigma <- sqrt(as.numeric(EM$variance))
       LRT <- EM$LRT
       model <- EM$model
-      result <- list(eff, mu0, sigma, LRT, model)
+      R2 <- EM$R2
+      like <- EM$log.likelihood
+      result <- list(eff, mu0, sigma, LRT, like, R2, model)
       return(result)
     }
     if(sele.g == "p" | sele.g == "f"){
@@ -410,6 +412,7 @@ MIM.search2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
       mu0 <- as.numeric(fit$coefficients[1])
       ms <- stats::anova(fit)$`Mean Sq`
       sigma <- ms[2]^0.5
+      R2 <- summary(fit)$r.squared
 
       L0 <- c()
       L1 <- c()
@@ -423,9 +426,11 @@ MIM.search2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
         L0[k] <- sum(L00)
         L1[k] <- sum(L01)
       }
-      LRT <- -2*sum(log(L0[!is.na(L0) & !is.na(L1)]/L1[!is.na(L0) & !is.na(L1)]))
+      like0 <- sum(log(L0))
+      like1 <- sum(log(L1))
+      LRT <- 2*(like1-like0)
 
-      result <- list(eff, mu0, sigma, LRT, model = "regression interval mapping model")
+      result <- list(eff, mu0, sigma, LRT, like1, R2, model = "regression interval mapping model")
       return(result)
     }
   }
@@ -454,18 +459,31 @@ MIM.search2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
     for(j in QTLs0){
       QTL0 <- rbind(QTL, c(i,j))
       fit0 <- meth(QTL0, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, conv)
-      effect0 <- c(t(QTL0), fit0[[1]], fit0[[4]])
+      effect0 <- c(t(QTL0), fit0[[1]], fit0[[4]], fit0[[5]], fit0[[6]])
 
-      LRT0 <- round(effect0[length(effect0)], 3)
-      if(console){cat(i, j, LRT0, knownQTL, "\n", sep = "\t")}
+      LRT0 <- round(effect0[length(effect0)-2], 3)
+      like <- round(effect0[length(effect0)-1], 5)
+      if(console){cat(i, j, LRT0, like, knownQTL, "\n", sep = "\t")}
       effect <- rbind(effect, effect0)
     }
-    model <- fit0[[5]]
+    model <- fit0[[7]]
   }
-  colnames(effect) <-  c(t(name0), colnames(D.matrix), "LRT")
+  colnames(effect) <-  c(t(name0), colnames(D.matrix), "LRT", "log.likelihood", "R2")
   row.names(effect) <- 1:nrow(effect)
 
-  best <- effect[effect[,ncol(effect)] == max(effect[,ncol(effect)]),]
+  b0 <- effect[,c(length(name0)-1, length(name0), ncol(effect)-1)]
+  bs <- c()
+  for(i in cr0){
+    b1 <- b0[b0[,1] == i,]
+    eff1 <- effect[b0[,1] == i,]
+    b2 <- nrow(b1)
+    b3 <- b1[-c(1,b2),3]-b1[-c(b2-1,b2),3]
+    b4 <- b1[-c(1,b2),3]-b1[-(1:2),3]
+    b5 <- which(b3 > 0 & b4 > 0)
+    bs <- rbind(bs, eff1[b5+1,])
+  }
+
+  best <- bs[bs[,ncol(bs)] == max(bs[,ncol(bs)]),]
   QTL.best <- matrix(best[1:(2*nq)], nq, 2, byrow = TRUE)
   colnames(QTL.best) <- c("chromosome", "position(cM)")
   row.names(QTL.best) <- c(paste("QTL", 1:(nq-1)), "QTL new")

@@ -19,7 +19,7 @@ IM.search2(
   cM = TRUE,
   speed = 1,
   conv = 10^-5,
-  d.eff = TRUE,
+  d.eff = FALSE,
   LRT.thre = TRUE,
   simu = 1000,
   alpha = 0.05,

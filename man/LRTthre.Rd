@@ -13,7 +13,7 @@ LRTthre(
   gv = 25,
   speed = 1,
   simu = 1000,
-  d.eff = TRUE,
+  d.eff = FALSE,
   alpha = 0.05,
   console = TRUE
 )
