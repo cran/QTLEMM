@@ -116,7 +116,7 @@ the possible position of QTL in all chromosome.
 load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
 
 # run and result
-result <- IM.search(marker, geno, y, type = "RI", ng = 2, speed = 5, conv = 10^-3, LRT.thre = 10)
+result <- IM.search(marker, geno, y, type = "RI", ng = 2, speed = 7.5, conv = 10^-3, LRT.thre = 10)
 result$detect.QTL
 }
 \references{

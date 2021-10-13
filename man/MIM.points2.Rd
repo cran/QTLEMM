@@ -132,7 +132,8 @@ yu <- y[y >= quantile(y)[2] & y <= quantile(y)[4]]
 geno.s <- geno[y > quantile(y)[4] | y < quantile(y)[2],]
 
 # run and result
-result <- MIM.points2(QTL, marker, geno.s, ys, yu, method = "EM", ng = 2, scope = c(0,2,0))
+result <- MIM.points2(QTL, marker, geno.s, ys, yu, sele.g = "p",
+ type = "RI", ng = 2, scope = c(0,3,0), speed = 2)
 result$QTL.best
 result$effect.best
 }

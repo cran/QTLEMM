@@ -121,6 +121,15 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
 
   nd <- 3
   if(type == "BC"){
+    checkBC <- function(x){
+      return(length(table(x)))
+    }
+    check0 <- apply(geno, 2, checkBC)
+    if(3 %in% check0){
+      warning("The geno data may not be a back cross geno data. The results may be biased.")
+    }
+    geno[geno == 0] <- 2
+
     nd <- 2
     type.fun <- function(d1, d2, ng){
       bcp2M <- function(d, nG){

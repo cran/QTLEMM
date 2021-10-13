@@ -108,7 +108,8 @@
 #'
 #' # run and result
 #' QTL <- c(1, 23)
-#' result <- MIM.search2(QTL, marker, geno.s, ys, yu, method = "EM", ng = 2, speed = 10, QTLdist = 50)
+#' result <- MIM.search2(QTL, marker, geno.s, ys, yu, sele.g = "p",
+#'  type = "RI", ng = 2, speed = 15, QTLdist = 50)
 #' result$QTL.best
 #' result$effect.best
 MIM.search2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR = NULL, method = "EM",

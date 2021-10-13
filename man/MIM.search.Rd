@@ -98,7 +98,7 @@ load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
 
 # run and result
 QTL <- c(1, 23)
-result <- MIM.search(QTL, marker, geno, y, type = "RI", ng = 2, speed = 10, QTLdist = 50)
+result <- MIM.search(QTL, marker, geno, y, type = "RI", ng = 2, speed = 15, QTLdist = 50)
 result$QTL.best
 result$effect.best
 }

@@ -60,13 +60,15 @@ will be shown in the R console or not.}
 \item{E.vector}{The QTL effects calculated by EM algorithm.}
 \item{beta}{The effects of the fixed factors calculated by EM
 algorithm.}
-\item{variance}{The variance calculated by EM algorithm.}
+\item{variance}{The error variance calculated by EM algorithm.}
 \item{PI.matrix}{The posterior probabilities matrix after the
 process of EM algorithm.}
 \item{log.likelihood}{The log likelihood value of this model.}
 \item{LRT}{The LRT statistic of this model.}
 \item{R2}{The coefficient of determination of this model. This
 can be used as an estimate of heritability.}
+\item{y.hat}{The fitted values of trait values calculated by
+the estimated values from the EM algorithm.}
 \item{iteration.time}{The iteration time of EM algorithm.}
 }
 \description{

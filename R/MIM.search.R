@@ -79,7 +79,7 @@
 #'
 #' # run and result
 #' QTL <- c(1, 23)
-#' result <- MIM.search(QTL, marker, geno, y, type = "RI", ng = 2, speed = 10, QTLdist = 50)
+#' result <- MIM.search(QTL, marker, geno, y, type = "RI", ng = 2, speed = 15, QTLdist = 50)
 #' result$QTL.best
 #' result$effect.best
 MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matrix = NULL, ng = 2, cM = TRUE,

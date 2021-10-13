@@ -98,7 +98,7 @@ Find the best QTL position near the designated QTL position.
 load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
 
 # run and result
-result <- MIM.points(QTL, marker, geno, y, type = "RI", ng = 2, scope = c(0,2,0))
+result <- MIM.points(QTL, marker, geno, y, type = "RI", ng = 2, scope = c(0,3,0), speed = 2)
 result$QTL.best
 result$effect.best
 }

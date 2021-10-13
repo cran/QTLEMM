@@ -119,7 +119,7 @@
 #'
 #' # run and result
 #' result <- IM.search2(marker, geno.s, ys, yu, sele.g = "p", type = "RI", ng = 2,
-#' speed = 5, conv = 10^-3, LRT.thre = 10)
+#' speed = 7.5, conv = 10^-3, LRT.thre = 10)
 #' result$detect.QTL
 IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR = NULL, method = "EM",
                        type = "RI", D.matrix = NULL, ng = 2, cM = TRUE, speed = 1, conv = 10^-5,
@@ -482,7 +482,7 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
   row.names(effect) <- 1:nrow(effect)
   colnames(effect) <- c("chr", "cM", colnames(D.matrix), "LRT", "R2")
   effect <- data.frame(effect)
-  effect[effect[, ncol(effect)] == Inf, 3:ncol(effect)] <- 0
+  effect[effect[, ncol(effect)] == Inf & !is.na(effect[, ncol(effect)]), 3:ncol(effect)] <- 0
 
 
   LRT.threshold <- NULL
@@ -537,7 +537,7 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
       graphics::par(mar = c(2, 5, 4, 2))
       graphics::par(fig = c(0, 1, 0, 0.45), new = TRUE)
       plot(effect[effect$chr == k,]$cM, effect[effect$chr == k,]$a1, ylab = "effect", main = paste("Chromosome", k),
-           xlab = "", type = "l", ylim = c(min(c(effect$a1, 0))*1.4, max(c(effect$a1, 0))*1.2), xaxt = "n", bty = "n")
+           xlab = "", type = "l", ylim = c(min(c(effect$a1, 0), na.rm = TRUE)*1.4, max(c(effect$a1, 0), na.rm = TRUE)*1.2), xaxt = "n", bty = "n")
       graphics::abline(h=0,col="black",lwd=2)
     }
   }
@@ -571,11 +571,11 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
     graphics::par(mar = c(2, 5, 4, 2))
     graphics::par(fig = c(0, 1, 0, 0.5), new = TRUE)
     plot(x0, effect$a1, main = "", ylab = "effect", xlab = "", type = "n",
-         ylim = c(min(c(effect$a1, 0))*1.2, max(c(effect$a1, 0))*1.2), xaxt = "n", bty = "n")
+         ylim = c(min(c(effect$a1, 0), na.rm = TRUE)*1.2, max(c(effect$a1, 0), na.rm = TRUE)*1.2), xaxt = "n", bty = "n")
     graphics::abline(h = 0, col = "blue", lwd = 2)
     for(k in 1:(length(xn)-1)){
       graphics::points(x0[(xn[k]+1):xn[k+1]], effect$a1[(xn[k]+1):xn[k+1]], main = "", ylab = "effect",
-                       xlab = "", type = "l", ylim = c(min(c(effect$a1, 0))*1.2, max(c(effect$a1, 0))*1.2),
+                       xlab = "", type = "l", ylim = c(min(c(effect$a1, 0), na.rm = TRUE)*1.2, max(c(effect$a1, 0))*1.2),
                        xaxt = "n", bty = "n")
     }
   }

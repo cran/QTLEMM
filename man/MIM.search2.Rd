@@ -132,7 +132,8 @@ geno.s <- geno[y > quantile(y)[4] | y < quantile(y)[2],]
 
 # run and result
 QTL <- c(1, 23)
-result <- MIM.search2(QTL, marker, geno.s, ys, yu, method = "EM", ng = 2, speed = 10, QTLdist = 50)
+result <- MIM.search2(QTL, marker, geno.s, ys, yu, sele.g = "p",
+ type = "RI", ng = 2, speed = 15, QTLdist = 50)
 result$QTL.best
 result$effect.best
 }

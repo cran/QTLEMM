@@ -37,13 +37,15 @@
 #' \item{E.vector}{The QTL effects calculated by EM algorithm.}
 #' \item{beta}{The effects of the fixed factors calculated by EM
 #' algorithm.}
-#' \item{variance}{The variance calculated by EM algorithm.}
+#' \item{variance}{The error variance calculated by EM algorithm.}
 #' \item{PI.matrix}{The posterior probabilities matrix after the
 #' process of EM algorithm.}
 #' \item{log.likelihood}{The log likelihood value of this model.}
 #' \item{LRT}{The LRT statistic of this model.}
 #' \item{R2}{The coefficient of determination of this model. This
 #' can be used as an estimate of heritability.}
+#' \item{y.hat}{The fitted values of trait values calculated by
+#' the estimated values from the EM algorithm.}
 #' \item{iteration.time}{The iteration time of EM algorithm.}
 #'
 #' @export
@@ -183,6 +185,9 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
     sigma.t <- sqrt((t(Y-X%*%beta.t)%*%(Y-X%*%beta.t)-t(Y-X%*%beta.t)%*%PI.matrix%*%D.matrix%*%E.t*2+t(E.t)%*%V.matrix%*%E.t)/ind)
 
     Delta <- E.t-E.vector
+    if(NaN %in% Delta){
+      break()
+    }
     time <- time+1
     if(console){
       Ep <- round(E.t, 3)
@@ -226,7 +231,7 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
   like1 <- sum(log(L1))
   LRT <- 2*(like1-like0)
   y.hat <- PI.matrix%*%D.matrix%*%E.vector+X%*%beta
-  r2 <- stats::cor(y, y.hat)
+  r2 <- stats::var(y.hat)/stats::var(y)
 
   if(time == 1000){
     E.vector <- rep(0, length(E.vector))
@@ -238,9 +243,8 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
     r2 <- 0
     warning("EM algorithm fails to converge, please check the input data or adjust the convergence criterion.")
   }
-  r2 <- (as.numeric(r2))^2
 
   result <- list(E.vector = E.vector, beta = as.numeric(beta), variance = as.numeric(variance),
-                 PI.matrix = PI.matrix, log.likelihood = like1, LRT = LRT, R2 = r2, iteration.time = time)
+                 PI.matrix = PI.matrix, log.likelihood = like1, LRT = LRT, R2 = r2, y.hat = y.hat, iteration.time = time)
   return(result)
 }

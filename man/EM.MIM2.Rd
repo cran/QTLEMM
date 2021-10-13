@@ -132,6 +132,10 @@ process of EM algorithm.}
 \item{LRT}{The LRT statistic of this model.}
 \item{R2}{The coefficient of determination of this model. This
 can be used as an estimate of heritability.}
+\item{y.hat}{The fitted values of trait values with genotyping
+calculated by the estimated values from the EM algorithm.}
+\item{yu.hat}{The fitted values of trait values without genotyping
+calculated by the estimated values from the EM algorithm.}
 \item{iteration.time}{The iteration time of EM algorithm.}
 \item{model}{The model of this analysis, which contains complete
 genotyping model, proposed model, truncated model, and

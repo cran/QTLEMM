@@ -79,7 +79,7 @@
 #' load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
 #'
 #' # run and result
-#' result <- MIM.points(QTL, marker, geno, y, type = "RI", ng = 2, scope = c(0,2,0))
+#' result <- MIM.points(QTL, marker, geno, y, type = "RI", ng = 2, scope = c(0,3,0), speed = 2)
 #' result$QTL.best
 #' result$effect.best
 MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matrix = NULL, ng = 2, cM = TRUE,

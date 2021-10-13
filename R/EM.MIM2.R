@@ -90,6 +90,10 @@
 #' \item{LRT}{The LRT statistic of this model.}
 #' \item{R2}{The coefficient of determination of this model. This
 #' can be used as an estimate of heritability.}
+#' \item{y.hat}{The fitted values of trait values with genotyping
+#' calculated by the estimated values from the EM algorithm.}
+#' \item{yu.hat}{The fitted values of trait values without genotyping
+#' calculated by the estimated values from the EM algorithm.}
 #' \item{iteration.time}{The iteration time of EM algorithm.}
 #' \item{model}{The model of this analysis, which contains complete
 #' genotyping model, proposed model, truncated model, and
@@ -355,6 +359,11 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
           cat(time, sp, Ep, "\n", sep = "\t")
         }
         time <- time+1
+
+        if(NaN %in% (Et1-Et)){
+          Et1 <- Et
+          break()
+        }
       }
       time <- time-1
 
@@ -364,7 +373,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       parameter <- c(mut1, Et1, sigt1)
 
       y.hat <- PI%*%D.matrix%*%Et1+X%*%mut1
-      r2 <- stats::cor(y, y.hat)
+      r2 <- stats::var(y.hat)/stats::var(y)
 
       Et1 <- parameter[2:(1+ncol(D.matrix))]
       mut1 <- parameter[1]
@@ -381,10 +390,10 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
         r2 <- 0
         warning("EM algorithm fails to converge, please check the input data or adjust the convergence criterion.")
       }
-      r2 <- (as.numeric(r2))^2
 
       output <- list(QTL = QTL, E.vector = Et1, beta = mut1, variance = sigt1, PI.matrix = PI,
-                     log.likehood = like1, LRT = LRT, R2 = r2, iteration.time = time)
+                     log.likelihood = like1, LRT = LRT, R2 = r2, y.hat = y.hat[1:length(ys)],
+                     yu.hat = y.hat[-(1:length(ys))], iteration.time = time)
       return(output)
     }
   } else {ya <- y}
@@ -654,7 +663,11 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
         E0 <- E
         sigma0 <- sigma
         mu1 <- mu0
-        Pi <- Freq*stats::dnorm(ys, mu, sigma)/U
+        Pi1 <- Freq*stats::dnorm(ys, mu, sigma)/U
+        if (NaN %in% Pi1){
+          break()
+        }
+        Pi <- Pi1
         Pi[rowSums(Pi) == 0,] <- 1
         Pi <- Pi/rowSums(Pi)
         Amy <- (stats::dnorm(tauL)-stats::dnorm(tauR))/U
@@ -681,6 +694,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
           sp <- round(sigma^2, 3)
           cat(iter, sp, Ep, "\n", sep = "\t")
         }
+
         Et[iter,] <- E
         Mt[iter] <- mu0
         St[iter] <- sigma
@@ -708,11 +722,11 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       colnames(Pi) <- colnames(mp)
 
       y.hat <- Pi%*%D.matrix%*%Et1+X%*%mut1
-      r2 <- stats::cor(ys, y.hat)
-      r2 <- (as.numeric(r2))^2
+      r2 <- stats::var(y.hat)/stats::var(ys)
 
       output <- list(QTL = QTL, E.vector = Et1, beta = mut1, variance = sigt1, PI.matrix = Pi,
-                     log.likehood = like1, LRT = LRT, R2 = r2, iteration.time = time)
+                     log.likelihood = like1, LRT = LRT, R2 = r2, y.hat = y.hat, yu.hat = NULL,
+                     iteration.time = time)
       return(output)
     }
 
@@ -733,8 +747,8 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
     re <- EM.MIM(D.matrix, cp.matrix, y, E.vector0 = E.vector, X = X, beta0 = beta, variance0 = variance,
                  conv = conv, console = console)
     result <- list(QTL = QTL, E.vector = re[[1]], beta = re[[2]], variance = re[[3]], PI.matrix = re[[4]],
-                   log.likelihood = re[[5]], LRT = re[[6]], R2 = re[[7]], iteration.time = re[[8]],
-                   model = "complete genotyping model")
+                   log.likelihood = re[[5]], LRT = re[[6]], R2 = re[[7]], y.hat = re[[8]], yu.hat = NULL,
+                   iteration.time = re[[9]], model = "complete genotyping model")
   }
   names(result[[2]]) <- effectname
   return(result)
