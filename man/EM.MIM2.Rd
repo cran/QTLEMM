@@ -2,7 +2,7 @@
 % Please edit documentation in R/EM.MIM2.R
 \name{EM.MIM2}
 \alias{EM.MIM2}
-\title{EM Algorithm for QTL MIM with Seletive Genotyping}
+\title{EM Algorithm for QTL MIM with Selective Genotyping}
 \usage{
 EM.MIM2(
   QTL,
@@ -143,7 +143,7 @@ frequency-based model.}
 }
 \description{
 Expectation-maximization algorithm for QTL multiple interval mapping.
-This funtion can handle the genotype witch is seletive genotyping.
+This function can handle the genotype data witch is selective genotyping.
 }
 \examples{
 # load the example data

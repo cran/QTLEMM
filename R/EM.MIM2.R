@@ -1,7 +1,7 @@
-#' EM Algorithm for QTL MIM with Seletive Genotyping
+#' EM Algorithm for QTL MIM with Selective Genotyping
 #'
 #' Expectation-maximization algorithm for QTL multiple interval mapping.
-#' This funtion can handle the genotype witch is seletive genotyping.
+#' This function can handle the genotype data witch is selective genotyping.
 #'
 #' @param QTL matrix. A q*2 matrix contains the QTL information, where
 #' the row dimension q is the number of QTLs in the chromosomes. The

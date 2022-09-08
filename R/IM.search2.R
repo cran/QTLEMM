@@ -1,8 +1,8 @@
-#' QTL search by IM with Seletive Genotyping
+#' QTL search by IM with Selective Genotyping
 #'
 #' Expectation-maximization algorithm for QTL interval mapping to search
-#' the possible position of QTL in all chromosome. This funtion can
-#' handle the genotype witch is seletive genotyping.
+#' the possible position of QTL in all chromosome. This function can
+#' handle the genotype data witch is selective genotyping.
 #'
 #' @param marker matrix. A k*2 matrix contains the marker information,
 #' where the row dimension k is the number of markers in the chromosomes.
@@ -85,6 +85,8 @@
 #' \item{detect.QTL}{The positions, effects and LRT statistics of the detected
 #' QTL significant using the obtained LRT threshold value.}
 #' \item{model}{The model of selective genotyping data in this analyze.}
+#'
+#' Graphical outputs including LOD value and effect of each position.
 #'
 #' @export
 #'

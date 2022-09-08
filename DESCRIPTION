@@ -1,7 +1,7 @@
 Package: QTLEMM
 Type: Package
 Title: QTL Mapping and Hotspots Detection
-Version: 1.1.0
+Version: 1.1.2
 Authors@R: c(
     person("Ping-Yuan", "Chung", email = "pychung@webmail.stat.sinica.edu.tw", role = "cre"),
     person("Chen-Hung", "Kao", email = "chkao@webmail.stat.sinica.edu.tw", role = "aut"))
@@ -26,18 +26,20 @@ Description:
     of our QTL mapping and hotspot detection methods for general use in genes, genomics and 
     genetics studies. The QTL mapping methods for the complete and selective genotyping 
     designs are based on the multiple interval mapping (MIM) model proposed by Kao, C.-H. ,
-    Z.-B. Zeng and R. D. Teasdale (1999)  <doi:10.1534/genetics.103.021642> and H.-I Lee,
-    H.-A. Ho and C.-H. Kao (2014) <doi:10.1534/genetics.114.168385>, respectively. The QTL 
+    Z.-B. Zeng and R. D. Teasdale (1999)  <doi: 10.1534/genetics.103.021642> and H.-I Lee,
+    H.-A. Ho and C.-H. Kao (2014) <doi: 10.1534/genetics.114.168385>, respectively. The QTL 
     hotspot detection analysis is based on the method by Wu, P.-Y., M.-.H. Yang, and C.-H.
-    Kao (2021) .
-Imports: mvtnorm, utils, stats, graphics
+    Kao (2021) <doi: 10.1093/g3journal/jkab056>.
+Imports: mvtnorm, utils, stats, graphics, grDevices
+URL: https://github.com/py-chung/QTLEMM
+BugReports: https://github.com/py-chung/QTLEMM/issues
 License: GPL-2
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0
 NeedsCompilation: no
-Packaged: 2021-10-13 09:46:54 UTC; pingyuan
+Packaged: 2022-09-08 09:17:28 UTC; pingyuan
 Author: Ping-Yuan Chung [cre],
   Chen-Hung Kao [aut]
 Maintainer: Ping-Yuan Chung <pychung@webmail.stat.sinica.edu.tw>
 Repository: CRAN
-Date/Publication: 2021-10-13 10:10:05 UTC
+Date/Publication: 2022-09-08 09:42:55 UTC

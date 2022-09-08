@@ -19,7 +19,7 @@
 #' @references
 #'
 #' Wu, P.-Y., M.-.H. Yang, and C.-H. KAO 2021 A Statistical Framework
-#' for QTL Hotspot Detection. G3: Genes, Genomes, Genetics (accepted).
+#' for QTL Hotspot Detection. G3: Genes, Genomes, Genetics: jkab056.
 #'
 #' @seealso
 #' \code{\link[QTLEMM]{LOD.QTLdetect}}
@@ -86,7 +86,7 @@ EQF.plot <- function(result, plot.all = TRUE, plot.cr = TRUE){
       graphics::par(mai = c(1, 1, 1, 1.5))
     }
     plot(x0, eqf.all, type = "h", ylab = "EQF", xlab = "chromosome", main = ma,
-         xaxt = "n", ylim = c(0, yli), yaxt = "n", cex.main = 1.5, axes = FALSE)
+         xaxt = "n", ylim = c(0, yli), yaxt = "n",  cex.main = 2, cex.lab = 1.2, axes = FALSE)
     graphics::axis(side = 1, pos = -yli/35, at = xn, labels = 1:nc, cex.axis = 1.2, tick = FALSE)
     lse <- 4000/max(x0)
     graphics::segments(x0, rep(-yli/35, length(x0)), x0, rep(-yli/70, length(x0)), lwd = lse)
@@ -104,7 +104,6 @@ EQF.plot <- function(result, plot.all = TRUE, plot.cr = TRUE){
 
   if(plot.cr | (nc == 1 & plot.all)){
     if(nc >= 4){
-      graphics::par(mfrow = c(2, 2))
       graphics::par(mai = c(0.8, 0.8, 0.8, 0.8))
       if(length(clumatrix) > 0){
         graphics::par(mai = c(0.8, 0.8, 0.8, 1.2))
@@ -118,14 +117,14 @@ EQF.plot <- function(result, plot.all = TRUE, plot.cr = TRUE){
     for(i in 1:nc){
       eqf <- eqf.all[cr0 == i]
       plot(eqf, type = "h", ylab = "EQF", xlab = "position(bin)", main = paste("cr", i, "   LOD thresholds = ", thre),
-           ylim = c(0, max(eqf.all)*1.2), yaxt = "n", cex.main = 1.2)
+           ylim = c(0, max(eqf.all)*1.2), yaxt = "n", cex.main = 2, cex.lab = 1.2)
       if(length(eqfthre)>0){
         for(k in 1:nrow(eqfthre)){
-          graphics::axis(2, eqfthre[k, 1], las = 2)
-          graphics::axis(4, paste(rownames(eqfthre)[k], " (", eqfthre[k, 2], ")", sep = ""), at = eqfthre[k], las = 2)
+          graphics::axis(2, eqfthre[k, 1], las = 2.5)
+          graphics::axis(4, paste(rownames(eqfthre)[k], " (", eqfthre[k, 2], ")", sep = ""), at = eqfthre[k], las = 2.5)
         }
         graphics::abline(h = eqfthre[, 1], col = "red")
-      } else {graphics::axis(2, seq(0, yli, 20), las = 2)}
+      } else {graphics::axis(2, seq(0, yli, 20), las = 2.5)}
     }
   }
 }

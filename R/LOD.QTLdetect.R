@@ -34,7 +34,7 @@
 #' @references
 #'
 #' Wu, P.-Y., M.-.H. Yang, and C.-H. KAO 2021 A Statistical Framework
-#' for QTL Hotspot Detection. G3: Genes, Genomes, Genetics (accepted).
+#' for QTL Hotspot Detection. G3: Genes, Genomes, Genetics: jkab056.
 #'
 #' @seealso
 #' \code{\link[QTLEMM]{EQF.permu}}
@@ -102,12 +102,12 @@ LOD.QTLdetect <- function(LOD, bin, thre = 3, QTLdist = 20, console = TRUE){
 
   det <- matrix(0, nt, ns)
   if(console){cat("step", "\t", "process", "\n")}
-  cons0 <- 100
-  if(nrow(LOD) < 200){cons0 <- 10}
+  t0 <- Sys.time()
   for(j in 1:nt){
     if(console){
-      if(j%%cons0 == 0 | j == nt){
+      if(Sys.time()-t0 > 1 | j == nt){
         cat("detect", paste(j, nt, sep = "/"), "\n", sep = "\t")
+        t0 <- Sys.time()
       }
     }
 
@@ -153,10 +153,12 @@ LOD.QTLdetect <- function(LOD, bin, thre = 3, QTLdist = 20, console = TRUE){
 
   link <- matrix(0, nt, nc)
   if(console){cat("step", "\t", "process", "\n")}
+  t0 <- Sys.time()
   for(j in 1:nt){
     if(console){
-      if(j%%cons0 == 0 | j == nt){
+      if(Sys.time()-t0 > 1 | j == nt){
         cat("linkage", paste(j, nt, sep = "/"), "\n", sep = "\t")
+        t0 <- Sys.time()
       }
     }
     for(i in 1:nc){
@@ -169,9 +171,13 @@ LOD.QTLdetect <- function(LOD, bin, thre = 3, QTLdist = 20, console = TRUE){
 
   EQF <- matrix(0, nt, ns)
   cat("step", "\t", "process", "\n")
+  t0 <- Sys.time()
   for(i in 1:nt){
-    if(i%%50 == 0 | i == nt){
-      cat("EQF caculating", paste(i, nt, sep = "/"), "\n", sep = "\t")
+    if(console){
+      if(Sys.time()-t0 > 1 | i == nt){
+        cat("EQF caculating", paste(i, nt, sep = "/"), "\n", sep = "\t")
+        t0 <- Sys.time()
+      }
     }
     QTL <- det[i,]
     if(!1 %in% QTL){next}
@@ -201,6 +207,9 @@ LOD.QTLdetect <- function(LOD, bin, thre = 3, QTLdist = 20, console = TRUE){
         if(ci0 <= length(QTLci3)){ci2 <- QTLci3[ci0]-1}
         sdi <- ((ci2-ci1)/(2*1.96))
         k1 <- stats::pnorm((1:n)+0.5, pii, sdi)-stats::pnorm((1:n)-0.5, pii, sdi)
+        if(length(k1) == 0){
+          k1 <- 0
+        }
         k0 <- k0+k1
       }
       ka <- c(ka, k0)

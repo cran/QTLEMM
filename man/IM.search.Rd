@@ -106,6 +106,8 @@ be shown in the R console or not.}
 Gaussian stochastic process (Kuo 2011; Kao and Ho 2012).}
 \item{detect.QTL}{The positions, effects and LRT statistics of the detected
 QTL significant using the obtained LRT threshold value.}
+
+Graphical outputs including LOD value and effect of each position.
 }
 \description{
 Expectation-maximization algorithm for QTL interval mapping to search

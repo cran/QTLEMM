@@ -65,6 +65,8 @@
 #' \item{detect.QTL}{The positions, effects and LRT statistics of the detected
 #' QTL significant using the obtained LRT threshold value.}
 #'
+#' Graphical outputs including LOD value and effect of each position.
+#'
 #' @export
 #'
 #' @references

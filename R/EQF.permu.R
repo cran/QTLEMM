@@ -31,7 +31,7 @@
 #' @references
 #'
 #' Wu, P.-Y., M.-.H. Yang, and C.-H. KAO 2021 A Statistical Framework
-#' for QTL Hotspot Detection. G3: Genes, Genomes, Genetics (accepted).
+#' for QTL Hotspot Detection. G3: Genes, Genomes, Genetics: jkab056.
 #'
 #' @seealso
 #' \code{\link[QTLEMM]{LOD.QTLdetect}}
@@ -105,6 +105,9 @@ EQF.permu <- function(LOD.QTLdetect.result, ptime = 1000, alpha = 0.05, Q = TRUE
     peqf <- c()
     clu.eqf1 <- apply(clu.eqf, 2, sum)
     peqf <- c(peqf, which.max(clu.eqf1))
+    if(max(clu.eqf1) == 0){
+      break
+    }
     group <- which(clu.det[, peqf] == 1)
     if(length(group) == 0){
       clu.eqf[, peqf] <- 0
@@ -163,8 +166,7 @@ EQF.permu <- function(LOD.QTLdetect.result, ptime = 1000, alpha = 0.05, Q = TRUE
   }
 
   eqf.premutation <- function(eqfmatrix, ptime = ptime, console = console){
-    tt <- 100
-    if(ptime < 200){tt <- 20}
+    t0 <- Sys.time()
     if(console){
       cat("permutation time", "\n")
     }
@@ -179,9 +181,10 @@ EQF.permu <- function(LOD.QTLdetect.result, ptime = 1000, alpha = 0.05, Q = TRUE
         p.matrix[j, k] <- eqfpos
       }
       out[i,] <- sort(apply(p.matrix, 2, sum), decreasing = TRUE)
-      if(i%%tt == 0 | i == ptime){
-        if(console){
+      if(console){
+        if(Sys.time()-t0 > 5 | i == ptime){
           cat(paste(i, ptime, sep = "/"), "\n", sep = "\t")
+          t0 <- Sys.time()
         }
       }
     }

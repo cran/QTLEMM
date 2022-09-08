@@ -2,7 +2,7 @@
 % Please edit documentation in R/MIM.points2.R
 \name{MIM.points2}
 \alias{MIM.points2}
-\title{QTL Short Distance Correction by MIM with Seletive Genotyping}
+\title{QTL Short Distance Correction by MIM with Selective Genotyping}
 \usage{
 MIM.points2(
   QTL,
@@ -120,7 +120,7 @@ QTL combination.}
 \description{
 Expectation-maximization algorithm for QTL multiple interval mapping.
 Find the best QTL position near the designated QTL position. This
-funtion can handle the genotype witch is seletive genotyping.
+function can handle the genotype data witch is selective genotyping.
 }
 \examples{
 # load the example data

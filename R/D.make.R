@@ -5,10 +5,7 @@
 #' @param nQTL integer. The number of QTLs.
 #' @param type character. The population type of the dataset. Include
 #' backcross (type="BC"), advanced intercross population (type="AI"), and
-#' recombinant inbred population (type="RI"). Note that if type="BC", the
-#' design matrix contain only additive effect and additive by additive
-#' interaction. If type="AI" or "RI", that will contain additive and
-#' dominance effects and all interaction.
+#' recombinant inbred population (type="RI").
 #' @param a integer or vector. A integer or vecter to decide the additive
 #' effects of which QTL will be considered in this design matrix. If
 #' a=TRUE, the additive effect of all QTLs will be considered. If

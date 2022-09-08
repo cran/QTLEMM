@@ -1,8 +1,8 @@
-#' QTL Short Distance Correction by MIM with Seletive Genotyping
+#' QTL Short Distance Correction by MIM with Selective Genotyping
 #'
 #' Expectation-maximization algorithm for QTL multiple interval mapping.
 #' Find the best QTL position near the designated QTL position. This
-#' funtion can handle the genotype witch is seletive genotyping.
+#' function can handle the genotype data witch is selective genotyping.
 #'
 #' @param QTL matrix. A q*2 matrix contains the QTL information, where
 #' the row dimension q is the number of QTLs in the chromosomes. The
