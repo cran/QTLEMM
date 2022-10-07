@@ -138,7 +138,7 @@ MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
     datatry <- try(D.matrix*D.matrix, silent=TRUE)
     if(type == "BC"){dn0 <- 2
     } else {dn0 <- 3}
-    if(class(datatry)[1] == "try-error" | NA %in% D.matrix | nrow(D.matrix) != nq^dn0){
+    if(class(datatry)[1] == "try-error" | NA %in% D.matrix | nrow(D.matrix) != dn0^nq){
       stop("Parameter D.matrix error, or the combination of genotypes in design matrix is error.",
            call. = FALSE)
     }

@@ -588,8 +588,8 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
                     E.vector = E.vector, X = X, beta = beta, variance = variance,
                     cp.matrix = cp.matrix, conv = conv, console = console)
     model <- "proposed model of selective genotyping"
-    result[[9]] <- model
-    names(result)[9] <- "model"
+    result[[12]] <- model
+    names(result)[12] <- "model"
   } else if (sele.g == "f"){
     if(nQTL > 1){QTL <- QTL[order(QTL[, 1], QTL[, 2]),]}
     marker <- marker[order(marker[, 1], marker[, 2]),]
@@ -597,8 +597,8 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
                     E.vector = E.vector, X = X, beta = beta, variance = variance,
                     cp.matrix = cp.matrix, conv = conv, console = console, pf = TRUE)
     model <- "population frequency-based model of selective genotyping"
-    result[[9]] <- model
-    names(result)[9] <- "model"
+    result[[12]] <- model
+    names(result)[12] <- "model"
   } else if (sele.g == "t"){
     QTL.t <- function(QTL, marker, geno, D.matrix, ys, yu, tL, tR, cM = TRUE, type = "RI", ng = 2,
                       E.vector = NULL, beta = NULL,  X=NULL, variance = NULL, cp.matrix = NULL,
@@ -738,8 +738,8 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
                     E.vector = E.vector, beta = beta, X = X, variance = variance,
                     cp.matrix = cp.matrix, conv = conv, console = console)
     model <- "truncated model of selective genotyping"
-    result[[9]] <- model
-    names(result)[9] <- "model"
+    result[[12]] <- model
+    names(result)[12] <- "model"
   } else {
     if(is.null(cp.matrix)){
       cp.matrix <- Q.make(QTL, marker, geno, cM = cM, type = type, ng = ng)[[(nrow(QTL)+1)]]

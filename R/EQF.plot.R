@@ -7,7 +7,7 @@
 #' or EQF.permu().
 #' @param plot.all logical. If being TURE, output one figure of the
 #' EQF values over the bins.
-#' @param plot.cr logical. If being TURE, output the figures of the
+#' @param plot.chr logical. If being TURE, output the figures of the
 #' EQF values over the bins of each chromosome.
 #'
 #' @return
@@ -32,7 +32,7 @@
 #' # run and result
 #' EQF.plot(LOD.QTLdetect.result)
 #' EQF.plot(EQF.permu.result)
-EQF.plot <- function(result, plot.all = TRUE, plot.cr = TRUE){
+EQF.plot <- function(result, plot.all = TRUE, plot.chr = TRUE){
 
   dat <- result
   name0 <- names(dat)
@@ -51,7 +51,7 @@ EQF.plot <- function(result, plot.all = TRUE, plot.cr = TRUE){
   }
 
   if(!plot.all[1] %in% c(0,1) | length(plot.all) > 1){plot.all <- TRUE}
-  if(!plot.cr[1] %in% c(0,1) | length(plot.cr) > 1){plot.cr <- TRUE}
+  if(!plot.chr[1] %in% c(0,1) | length(plot.chr) > 1){plot.chr <- TRUE}
 
   EQF <- dat$EQF.matrix
   clumatrix <- dat$cluster.matrix
@@ -102,7 +102,7 @@ EQF.plot <- function(result, plot.all = TRUE, plot.cr = TRUE){
     } else {graphics::axis(2, seq(0, yli, 20), las = 2)}
   }
 
-  if(plot.cr | (nc == 1 & plot.all)){
+  if(plot.chr | (nc == 1 & plot.all)){
     if(nc >= 4){
       graphics::par(mai = c(0.8, 0.8, 0.8, 0.8))
       if(length(clumatrix) > 0){

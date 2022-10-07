@@ -4,7 +4,7 @@
 \alias{EQF.plot}
 \title{EQF plot}
 \usage{
-EQF.plot(result, plot.all = TRUE, plot.cr = TRUE)
+EQF.plot(result, plot.all = TRUE, plot.chr = TRUE)
 }
 \arguments{
 \item{result}{list. The data list of the output from LOD.QTLdetect()
@@ -13,7 +13,7 @@ or EQF.permu().}
 \item{plot.all}{logical. If being TURE, output one figure of the
 EQF values over the bins.}
 
-\item{plot.cr}{logical. If being TURE, output the figures of the
+\item{plot.chr}{logical. If being TURE, output the figures of the
 EQF values over the bins of each chromosome.}
 }
 \value{

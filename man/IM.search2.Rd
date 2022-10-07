@@ -26,7 +26,7 @@ IM.search2(
   detect = TRUE,
   QTLdist = 15,
   plot.all = TRUE,
-  plot.cr = TRUE,
+  plot.chr = TRUE,
   console = TRUE
 )
 }
@@ -121,7 +121,7 @@ linked significant QTL.}
 \item{plot.all}{logical. If being TRUE, output the profile of LRT
 statistics for the genome in one figure.}
 
-\item{plot.cr}{logical. If being TRUE, output the profile of LRT
+\item{plot.chr}{logical. If being TRUE, output the profile of LRT
 statistics for the chromosomes.}
 
 \item{console}{logical. To decide whether the process of algorithm will

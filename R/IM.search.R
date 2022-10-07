@@ -53,7 +53,7 @@
 #' linked significant QTL.
 #' @param plot.all logical. If being TRUE, output the profile of LRT
 #' statistics for the genome in one figure.
-#' @param plot.cr logical. If being TRUE, output the profile of LRT
+#' @param plot.chr logical. If being TRUE, output the profile of LRT
 #' statistics for the chromosomes.
 #' @param console logical. To decide whether the process of algorithm will
 #' be shown in the R console or not.
@@ -95,7 +95,7 @@
 #' result$detect.QTL
 IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NULL, ng = 2, cM = TRUE,
                       speed = 1, conv = 10^-5, d.eff = FALSE, LRT.thre = TRUE, simu = 1000, alpha = 0.05,
-                      detect = TRUE, QTLdist = 15, plot.all = TRUE, plot.cr = TRUE, console = TRUE){
+                      detect = TRUE, QTLdist = 15, plot.all = TRUE, plot.chr = TRUE, console = TRUE){
 
   if(is.null(marker) | is.null(geno) | is.null(y)){
     stop("Input data is missing, please cheak and fix", call. = FALSE)
@@ -177,7 +177,7 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   }
 
   if(!plot.all[1] %in% c(0,1) | length(plot.all) > 1){plot.all <- TRUE}
-  if(!plot.cr[1] %in% c(0,1) | length(plot.cr) > 1){plot.cr <- TRUE}
+  if(!plot.chr[1] %in% c(0,1) | length(plot.chr) > 1){plot.chr <- TRUE}
   if(!console[1] %in% c(0,1) | length(console) > 1){console <- TRUE}
 
   if(!cM){
@@ -307,7 +307,7 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   on.exit(graphics::par(oldpar))
 
   nc0 <- length(cr0)
-  if(plot.cr | (nc0 == 1 & plot.all)){
+  if(plot.chr | (nc0 == 1 & plot.all)){
     for(k in cr0){
       graphics::par(mar = c(5, 5, 4, 2))
       graphics::par(fig = c(0, 1, 0.35, 1))
