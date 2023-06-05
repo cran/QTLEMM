@@ -13,6 +13,7 @@ EM.MIM(
   beta0 = NULL,
   variance0 = NULL,
   conv = 10^-5,
+  stop = 1000,
   console = TRUE
 )
 }
@@ -53,6 +54,10 @@ phenotype values.}
 The E and M steps will be iterated until a convergence criterion
 is satisfied.}
 
+\item{stop}{numeric. The stopping criterion of EM algorithm.
+The E and M steps will be stop when the iteration number reaches the
+stop criterion, and it will treat the algorithm as failing to converge.}
+
 \item{console}{logical. To decide whether the process of algorithm
 will be shown in the R console or not.}
 }
@@ -69,7 +74,7 @@ process of EM algorithm.}
 can be used as an estimate of heritability.}
 \item{y.hat}{The fitted values of trait values calculated by
 the estimated values from the EM algorithm.}
-\item{iteration.time}{The iteration time of EM algorithm.}
+\item{iteration.number}{The iteration number of EM algorithm.}
 }
 \description{
 Expectation-maximization algorithm for QTL multiple interval mapping.

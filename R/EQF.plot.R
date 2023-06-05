@@ -116,7 +116,7 @@ EQF.plot <- function(result, plot.all = TRUE, plot.chr = TRUE){
     }
     for(i in 1:nc){
       eqf <- eqf.all[cr0 == i]
-      plot(eqf, type = "h", ylab = "EQF", xlab = "position(bin)", main = paste("cr", i, "   LOD thresholds = ", thre),
+      plot(eqf, type = "h", ylab = "EQF", xlab = "position(bin)", main = paste("chr", i, "   LOD thresholds = ", thre),
            ylim = c(0, max(eqf.all)*1.2), yaxt = "n", cex.main = 2, cex.lab = 1.2)
       if(length(eqfthre)>0){
         for(k in 1:nrow(eqfthre)){

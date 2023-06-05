@@ -179,13 +179,13 @@ MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
   sr <- list()
   q0 <- QTL[1, 2]
   r0 <- union(seq(q0-scope[1], q0, speed), seq(q0, q0+scope[1], speed))
-  r0 <- r0[r0 >= min(marker[marker[, 1] == ch0[1], 2]) & r0 <= max(marker[marker[, 1] == ch0[1], 2])]
+  r0 <- r0[r0 > min(marker[marker[, 1] == ch0[1], 2]) & r0 < max(marker[marker[, 1] == ch0[1], 2])]
   sr[[1]] <- r0
   if(nq > 1){
     for(i in 2:nq){
       q0 <- QTL[i, 2]
       r0 <- union(seq(q0-scope[i], q0, speed), seq(q0, q0+scope[i], speed))
-      r0 <- r0[r0 >= min(marker[marker[, 1] == ch0[1], 2]) & r0 <= max(marker[marker[, 1] == ch0[1], 2])]
+      r0 <- r0[r0 > min(marker[marker[, 1] == ch0[1], 2]) & r0 < max(marker[marker[, 1] == ch0[1], 2])]
       if(ch0[i] == ch0[i-1]){
         r0 <- r0[r0 > max(sr[[i-1]])]
       }

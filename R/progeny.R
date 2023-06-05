@@ -38,10 +38,13 @@
 #' @param size numeric. The population size of simulated progeny.
 #'
 #' @return
-#' \item{phe}{The phenotypic value of simulated progeny.}
+#' \item{phe}{The phenotypic value of each simulated progeny.}
 #' \item{E.vector}{The effect vector used in this simulation.}
-#' \item{marker.prog}{The marker genotype of simulated progeny.}
-#' \item{QTL.prog}{The QTL genotype of simulated progeny.}
+#' \item{marker.prog}{The marker genotype of each simulated progeny.}
+#' \item{QTL.prog}{The QTL genotype of each simulated progeny.}
+#' \item{VG}{The genetic variance of this population.}
+#' \item{VE}{The environmental variance of this population.}
+#' \item{genetic.value}{The genetic value of each simulated progeny.}
 #'
 #' @export
 #'
@@ -360,6 +363,7 @@ progeny <- function(QTL, marker, type = "RI", ng = 2, cM = TRUE, E.vector = NULL
 
   VE <- VG*(1-h2)/h2
   phe <- c()
+  genetic.value <- c()
   for(i in 1:size){
     genoQ <- prog[i, marker0[, 3] == 0]
     genoQ1 <- genoQ[1]
@@ -370,12 +374,14 @@ progeny <- function(QTL, marker, type = "RI", ng = 2, cM = TRUE, E.vector = NULL
     }
     eff <- D.matrix%*%E.vector
     eff <- eff[row.names(eff) == genoQ1,]
+    genetic.value[i] <- eff
     phe[i] <- eff+stats::rnorm(1, 0, sqrt(VE))
   }
 
   marker.prog <- prog[, marker0[, 3] != 0]
   QTL.prog <- prog[, marker0[, 3] == 0]
 
-  output <- list(phe = phe, E.vector = E.vector, marker.prog = marker.prog, QTL.prog = QTL.prog)
+  output <- list(phe = phe, E.vector = E.vector, marker.prog = marker.prog,
+                 QTL.prog = QTL.prog, genetic.value = genetic.value, VG = VG, VE = VE)
   return(output)
 }

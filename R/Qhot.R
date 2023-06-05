@@ -337,14 +337,14 @@ Qhot <- function(DataQTL, DataCrop, ScanStep = 1, NH = 100, NP = 1000, save.pdf 
            col = grDevices::rainbow(N.trait, start = 0.1, end = 0.9, v = 0.8)[1:N.trait])
 
     Na.x <- paste(DataQTL.chr2, " ( ", DataQTL.chr3, "% )", sep = "")
-    graphics::axis(4, y.pt, labels = Na.x, cex.axis = 1, las = 1, tck = -0.005,
+    graphics::axis(4, y.pt, labels = Na.x, cex.axis = 0.8, las = 1, tck = -0.005,
          pos = xt+(0.05*x2), col = graphics::par()$bg, col.axis = "navy", mgp = c(3, 0.005, 0))
 
     graphics::axis(4, yt,labels = "Total", cex.axis = 1, las= 1, tck = -0.005,
          pos = xt+(0.05*x2), col = graphics::par()$bg, col.axis = "navy", mgp = c(3, 0.005, 0))
 
     Na.x.total <- paste(NoQTL[i], " ( ",100,"% )", sep = "")
-    graphics::axis(4, 0.5*(yb+yt), labels = Na.x.total, cex.axis = 1, las = 1, tck = -0.005,
+    graphics::axis(4, 0.5*(yb+yt), labels = Na.x.total, cex.axis = 0.75, las = 1, tck = -0.005,
          pos = xt+(0.05*x2), col = graphics::par()$bg, col.axis = "navy", mgp = c(3, 0.005, 0))
 
     Left <- DataF[[i]][, 2]
@@ -355,7 +355,7 @@ Qhot <- function(DataQTL, DataCrop, ScanStep = 1, NH = 100, NP = 1000, save.pdf 
     } else {x.last <- xt}
     graphics::lines(c(Left, x.last), c(Freq, 0), type = "s", lwd = 1, col = "gray20")
 
-    Na.submain <- paste("Draw all flanking markers of QTLs in the chromosome ", Na.chr[i], sep = "")
+    Na.submain <- paste("All flanking markers of QTLs in the chromosome ", Na.chr[i], sep = "")
     graphics::axis(1,0.5*ChrL[i], labels = Na.submain, cex.axis = 1, las = 0, tck = -0.005,
          pos = 0.5*(yb+y1), col = graphics::par()$bg, col.axis = 1, mgp = c(3, 0.005, 0))
 
@@ -417,7 +417,7 @@ Qhot <- function(DataQTL, DataCrop, ScanStep = 1, NH = 100, NP = 1000, save.pdf 
              pos = xt+(0.01*x2), col = graphics::par()$bg, col.axis = "navy", mgp = c(3, 0.005, 0))
 
         Na.x.total <- paste(sum(Index.LRH), " ( ", 100, "% )", sep = "")
-        graphics::axis(4, 0.5*(yb+yt), labels = Na.x.total, cex.axis = 1, las = 1, tck = -0.005,
+        graphics::axis(4, 0.5*(yb+yt), labels = Na.x.total, cex.axis = 0.8, las = 1, tck = -0.005,
              pos = xt+(0.05*x2),col = graphics::par()$bg, col.axis = "navy", mgp = c(3, 0.005, 0))
         DataQTL.nHot2 <- factor(as.vector(DataQTL[DataQTL[, 3] == Na.chr[i], 2][Index.LRH]), levels = Na.trait)
 
@@ -426,7 +426,7 @@ Qhot <- function(DataQTL, DataCrop, ScanStep = 1, NH = 100, NP = 1000, save.pdf 
         graphics::points(x.pt, y.pt, pch = 1:N.trait,
                col = grDevices::rainbow(N.trait, start = 0.1, end = 0.9, v = 0.8)[1:N.trait])
         Na.x <- paste(DataQTL.nHot3, " ( ", DataQTL.nHot4, "% )", sep = "")
-        graphics::axis(4, y.pt, labels = Na.x, cex.axis = 1, las = 1, tck = -0.005,
+        graphics::axis(4, y.pt, labels = Na.x, cex.axis = 0.8, las = 1, tck = -0.005,
              pos = xt+(0.05*x2), col = graphics::par()$bg, col.axis = "navy", mgp = c(3, 0.005, 0))
 
 

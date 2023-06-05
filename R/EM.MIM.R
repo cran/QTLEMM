@@ -30,6 +30,9 @@
 #' @param conv numeric. The convergence criterion of EM algorithm.
 #' The E and M steps will be iterated until a convergence criterion
 #' is satisfied.
+#' @param stop numeric. The stopping criterion of EM algorithm.
+#' The E and M steps will be stop when the iteration number reaches the
+#' stop criterion, and it will treat the algorithm as failing to converge.
 #' @param console logical. To decide whether the process of algorithm
 #' will be shown in the R console or not.
 #'
@@ -46,7 +49,7 @@
 #' can be used as an estimate of heritability.}
 #' \item{y.hat}{The fitted values of trait values calculated by
 #' the estimated values from the EM algorithm.}
-#' \item{iteration.time}{The iteration time of EM algorithm.}
+#' \item{iteration.number}{The iteration number of EM algorithm.}
 #'
 #' @export
 #'
@@ -73,8 +76,8 @@
 #' cp.matrix <- Q.make(QTL, marker, geno, type = "RI", ng = 2)$cp.matrix
 #' result <- EM.MIM(D.matrix, cp.matrix, y)
 #' result$E.vector
-EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
-                   beta0 = NULL, variance0 = NULL, conv = 10^-5, console = TRUE){
+EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = NULL,
+                   variance0 = NULL, conv = 10^-5, stop = 1000, console = TRUE){
 
   if(is.null(D.matrix) | is.null(cp.matrix) | is.null(y)){
     stop("Input data is missing, please cheak and fix", call. = FALSE)
@@ -130,16 +133,16 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
   }
 
   Delta <- 1
-  time <- 0
+  number <- 0
 
   if(length(colnames(D.matrix)) == ncol(D.matrix)){
     effectname <- colnames(D.matrix)
   }
 
   if(console){
-    cat("Time", "var", effectname, "\n", sep = "\t")
+    cat("number", "var", effectname, "\n", sep = "\t")
   }
-  while (max(abs(Delta)) > conv & time < 1000) {
+  while (max(abs(Delta)) > conv & number < stop) {
     muji.matrix <- t(D.matrix%*%E.vector%*%matrix(1, 1, ind))+X%*%beta%*%matrix(1, 1, g)
 
     PI.matrix <- matrix(0, ind, g)
@@ -188,11 +191,11 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
     if(NaN %in% Delta){
       break()
     }
-    time <- time+1
+    number <- number+1
     if(console){
       Ep <- round(E.t, 3)
       sp <- round(sigma.t^2, 3)
-      cat(time, sp, Ep, "\n", sep = "\t")
+      cat(number, sp, Ep, "\n", sep = "\t")
     }
 
     E.vector <- E.t
@@ -233,7 +236,7 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
   y.hat <- PI.matrix%*%D.matrix%*%E.vector+X%*%beta
   r2 <- stats::var(y.hat)/stats::var(y)
 
-  if(time == 1000){
+  if(number == stop){
     E.vector <- rep(0, length(E.vector))
     beta <- 0
     variance <- 0
@@ -241,10 +244,10 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL,
     like1 <- -Inf
     LRT <- 0
     r2 <- 0
-    warning("EM algorithm fails to converge, please check the input data or adjust the convergence criterion.")
+    warning("EM algorithm fails to converge, please check the input data or adjust the convergence criterion and stopping criterion.")
   }
 
   result <- list(E.vector = E.vector, beta = as.numeric(beta), variance = as.numeric(variance),
-                 PI.matrix = PI.matrix, log.likelihood = like1, LRT = LRT, R2 = r2, y.hat = y.hat, iteration.time = time)
+                 PI.matrix = PI.matrix, log.likelihood = like1, LRT = LRT, R2 = r2, y.hat = y.hat, iteration.number = number)
   return(result)
 }

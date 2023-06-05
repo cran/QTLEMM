@@ -4,7 +4,15 @@
 \alias{D.make}
 \title{Generate D Matrix}
 \usage{
-D.make(nQTL, type = "RI", a = TRUE, d = TRUE, aa = 0, dd = 0, ad = 0)
+D.make(
+  nQTL,
+  type = "RI",
+  a = TRUE,
+  d = TRUE,
+  aa = FALSE,
+  dd = FALSE,
+  ad = FALSE
+)
 }
 \arguments{
 \item{nQTL}{integer. The number of QTLs.}
@@ -16,12 +24,12 @@ recombinant inbred population (type="RI").}
 \item{a}{integer or vector. A integer or vecter to decide the additive
 effects of which QTL will be considered in this design matrix. If
 a=TRUE, the additive effect of all QTLs will be considered. If
-a=0, no additive effect will be considered.}
+a=FALSE, no additive effect will be considered.}
 
 \item{d}{integer or vector. A integer or vecter to decide the dominant
 effects of which QTL will be considered in this design matrix. If
 d=TRUE, the dominant effect of all QTLs will be considered.If
-d=0, no dominant effect will be considered.}
+d=FALSE, no dominant effect will be considered.}
 
 \item{aa}{vector or matrix. The additive-by-additive interaction. Tow
 format can be used in this parameter. One format is vector, in which
@@ -29,7 +37,7 @@ every two elements indicate a combination of additive-by-additive
 interaction. The other format is a 2*i matrix, where i is the number
 of combination of interaction, and each column indicates the two
 interacting QTL. Besides, if aa=TRUE, all combinations of
-additive-by-additive interaction will be considered. If aa=0, no
+additive-by-additive interaction will be considered. If aa=FALSE,, no
 additive-by-additive interaction will be considered.}
 
 \item{dd}{vector or matrix. The dominant-by-dominant interaction. The

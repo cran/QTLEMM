@@ -58,10 +58,13 @@ should be a number between 0 and 1.}
 \item{size}{numeric. The population size of simulated progeny.}
 }
 \value{
-\item{phe}{The phenotypic value of simulated progeny.}
+\item{phe}{The phenotypic value of each simulated progeny.}
 \item{E.vector}{The effect vector used in this simulation.}
-\item{marker.prog}{The marker genotype of simulated progeny.}
-\item{QTL.prog}{The QTL genotype of simulated progeny.}
+\item{marker.prog}{The marker genotype of each simulated progeny.}
+\item{QTL.prog}{The QTL genotype of each simulated progeny.}
+\item{VG}{The genetic variance of this population.}
+\item{VE}{The environmental variance of this population.}
+\item{genetic.value}{The genetic value of each simulated progeny.}
 }
 \description{
 Generate the simulated phenotype and genotype data for a specified
