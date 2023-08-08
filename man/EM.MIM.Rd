@@ -12,8 +12,9 @@ EM.MIM(
   X = NULL,
   beta0 = NULL,
   variance0 = NULL,
-  conv = 10^-5,
+  crit = 10^-5,
   stop = 1000,
+  conv = TRUE,
   console = TRUE
 )
 }
@@ -50,13 +51,17 @@ value will be the average of y.}
 variance0=NULL, the initial value will be the variance of
 phenotype values.}
 
-\item{conv}{numeric. The convergence criterion of EM algorithm.
+\item{crit}{numeric. The convergence criterion of EM algorithm.
 The E and M steps will be iterated until a convergence criterion
 is satisfied.}
 
 \item{stop}{numeric. The stopping criterion of EM algorithm.
 The E and M steps will be stop when the iteration number reaches the
 stop criterion, and it will treat the algorithm as failing to converge.}
+
+\item{conv}{logical. If being False, it will ignore the inability to
+converge, and output the last result in the process of EM algorithm
+before the stopping criterion.}
 
 \item{console}{logical. To decide whether the process of algorithm
 will be shown in the R console or not.}

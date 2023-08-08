@@ -18,7 +18,7 @@ IM.search2(
   ng = 2,
   cM = TRUE,
   speed = 1,
-  conv = 10^-5,
+  crit = 10^-5,
   d.eff = FALSE,
   LRT.thre = TRUE,
   simu = 1000,
@@ -94,7 +94,7 @@ centi-Morgan. Or cM=FALSE for Morgan.}
 
 \item{speed}{numeric. The walking speed of the QTL search (in cM).}
 
-\item{conv}{numeric. The convergent criterion of EM algorithm.
+\item{crit}{numeric. The convergent criterion of EM algorithm.
 The E and M steps will be iterated until a convergent criterion
 is satisfied.}
 
@@ -153,7 +153,7 @@ geno.s <- geno[y > quantile(y)[4] | y < quantile(y)[2],]
 
 # run and result
 result <- IM.search2(marker, geno.s, ys, yu, sele.g = "p", type = "RI", ng = 2,
-speed = 7.5, conv = 10^-3, LRT.thre = 10)
+speed = 7.5, crit = 10^-3, LRT.thre = 10)
 result$detect.QTL
 }
 \references{

@@ -27,12 +27,15 @@
 #' @param variance0 numeric. The initial value for variance. If
 #' variance0=NULL, the initial value will be the variance of
 #' phenotype values.
-#' @param conv numeric. The convergence criterion of EM algorithm.
+#' @param crit numeric. The convergence criterion of EM algorithm.
 #' The E and M steps will be iterated until a convergence criterion
 #' is satisfied.
 #' @param stop numeric. The stopping criterion of EM algorithm.
 #' The E and M steps will be stop when the iteration number reaches the
 #' stop criterion, and it will treat the algorithm as failing to converge.
+#' @param conv logical. If being False, it will ignore the inability to
+#' converge, and output the last result in the process of EM algorithm
+#' before the stopping criterion.
 #' @param console logical. To decide whether the process of algorithm
 #' will be shown in the R console or not.
 #'
@@ -77,7 +80,7 @@
 #' result <- EM.MIM(D.matrix, cp.matrix, y)
 #' result$E.vector
 EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = NULL,
-                   variance0 = NULL, conv = 10^-5, stop = 1000, console = TRUE){
+                   variance0 = NULL, crit = 10^-5, stop = 1000, conv = TRUE, console = TRUE){
 
   if(is.null(D.matrix) | is.null(cp.matrix) | is.null(y)){
     stop("Input data is missing, please cheak and fix", call. = FALSE)
@@ -112,6 +115,7 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
   }
   if(is.null(variance)){variance <- stats::var(Y)}
   if(!console[1] %in% c(0,1) | length(console) > 1){console <- TRUE}
+  if(!conv[1] %in% c(0,1) | length(conv) > 1){conv <- TRUE}
 
   datatry <- try(D.matrix%*%E.vector, silent=TRUE)
   if(class(datatry)[1] == "try-error" | NA %in% E.vector){
@@ -128,8 +132,8 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
   }
   sigma <- sqrt(variance)
 
-  if(!is.numeric(conv) | length(conv) > 1 | min(conv) < 0){
-    stop("Parameter conv error, please input a positive number.", call. = FALSE)
+  if(!is.numeric(crit) | length(crit) > 1 | min(crit) < 0){
+    stop("Parameter crit error, please input a positive number.", call. = FALSE)
   }
 
   Delta <- 1
@@ -142,7 +146,7 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
   if(console){
     cat("number", "var", effectname, "\n", sep = "\t")
   }
-  while (max(abs(Delta)) > conv & number < stop) {
+  while (max(abs(Delta)) > crit & number < stop) {
     muji.matrix <- t(D.matrix%*%E.vector%*%matrix(1, 1, ind))+X%*%beta%*%matrix(1, 1, g)
 
     PI.matrix <- matrix(0, ind, g)
@@ -237,13 +241,15 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
   r2 <- stats::var(y.hat)/stats::var(y)
 
   if(number == stop){
-    E.vector <- rep(0, length(E.vector))
-    beta <- 0
-    variance <- 0
-    PI.matrix <- matrix(0, nrow(PI.matrix), ncol(PI.matrix))
-    like1 <- -Inf
-    LRT <- 0
-    r2 <- 0
+    if(conv){
+      E.vector <- rep(0, length(E.vector))
+      beta <- 0
+      variance <- 0
+      PI.matrix <- matrix(0, nrow(PI.matrix), ncol(PI.matrix))
+      like1 <- -Inf
+      LRT <- 0
+      r2 <- 0
+    }
     warning("EM algorithm fails to converge, please check the input data or adjust the convergence criterion and stopping criterion.")
   }
 

@@ -34,7 +34,7 @@
 #' @param cM logical. Specify the unit of marker position. cM=TRUE for
 #' centi-Morgan. Or cM=FALSE for Morgan.
 #' @param speed numeric. The walking speed of the QTL search (in cM).
-#' @param conv numeric. The convergent criterion of EM algorithm.
+#' @param crit numeric. The convergent criterion of EM algorithm.
 #' The E and M steps will be iterated until a convergent criterion
 #' is satisfied.
 #' @param d.eff logical. Specify whether the dominant effect will be
@@ -91,10 +91,10 @@
 #' load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
 #'
 #' # run and result
-#' result <- IM.search(marker, geno, y, type = "RI", ng = 2, speed = 7.5, conv = 10^-3, LRT.thre = 10)
+#' result <- IM.search(marker, geno, y, type = "RI", ng = 2, speed = 7.5, crit = 10^-3, LRT.thre = 10)
 #' result$detect.QTL
 IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NULL, ng = 2, cM = TRUE,
-                      speed = 1, conv = 10^-5, d.eff = FALSE, LRT.thre = TRUE, simu = 1000, alpha = 0.05,
+                      speed = 1, crit = 10^-5, d.eff = FALSE, LRT.thre = TRUE, simu = 1000, alpha = 0.05,
                       detect = TRUE, QTLdist = 15, plot.all = TRUE, plot.chr = TRUE, console = TRUE){
 
   if(is.null(marker) | is.null(geno) | is.null(y)){
@@ -154,8 +154,8 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
     stop("Parameter speed error, please input a positive number.", call. = FALSE)
   }
 
-  if(!is.numeric(conv) | length(conv) > 1 | min(conv) < 0){
-    stop("Parameter conv error, please input a positive number.", call. = FALSE)
+  if(!is.numeric(crit) | length(crit) > 1 | min(crit) < 0){
+    stop("Parameter crit error, please input a positive number.", call. = FALSE)
   }
 
   if(!d.eff[1] %in% c(0,1) | length(d.eff) > 1){d.eff <- TRUE}
@@ -203,8 +203,8 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   }
 
   if(method == "EM"){
-    meth <- function(D.matrix, cp.matrix, y, conv){
-      EM <- EM.MIM(D.matrix, cp.matrix, y, conv = conv, console = FALSE)
+    meth <- function(D.matrix, cp.matrix, y, crit){
+      EM <- EM.MIM(D.matrix, cp.matrix, y, crit = crit, console = FALSE)
       eff <- as.numeric(EM$E.vector)
       mu0 <- as.numeric(EM$beta)
       sigma <- sqrt(as.numeric(EM$variance))
@@ -213,7 +213,7 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
       return(result)
     }
   } else if (method == "REG"){
-    meth <- function(D.matrix, cp.matrix, y, conv){
+    meth <- function(D.matrix, cp.matrix, y, crit){
       X <- cp.matrix%*%D.matrix
       fit <- stats::lm(y~X)
       eff <- as.numeric(fit$coefficients[-1])
@@ -231,11 +231,13 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   cr0 <- unique(marker[, 1])
   for(i in cr0){
     cr <- marker[marker[, 1] == i,]
-    for(j in seq(ceiling(floor(min(cr[,2]))+speed), (max(cr[,2])), speed)){
+    minpos <- min(cr[, 2])+speed
+    if(speed%%1 == 0){minpos = ceiling(floor(min(cr[, 2]))+speed)}
+    for(j in seq(minpos, (max(cr[,2])), speed)){
       Q.matrix <- Q.make(matrix(c(i, j), 1, 2), marker, geno, type = type, ng = ng)
       cp.matrix <- Q.matrix$cp.matrix
 
-      result <- meth(D.matrix, cp.matrix, y, conv)
+      result <- meth(D.matrix, cp.matrix, y, crit)
       eff <- result[[1]]
       mu0 <- result[[2]]
       sigma <- result[[3]]
@@ -303,8 +305,10 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
     detect.QTL <- detectQTL(effect, LRT.threshold, QTLdist)
   }
 
-  oldpar <- graphics::par(no.readonly = TRUE)
-  on.exit(graphics::par(oldpar))
+  if(plot.chr | plot.all){
+    oldpar <- graphics::par(no.readonly = TRUE)
+    on.exit(graphics::par(oldpar))
+  }
 
   nc0 <- length(cr0)
   if(plot.chr | (nc0 == 1 & plot.all)){

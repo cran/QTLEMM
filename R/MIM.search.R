@@ -45,7 +45,9 @@
 #' linked significant QTL. The position near the position of the known
 #' QTLs under this distance will not be consider as the candidate position
 #' in the search process.
-#' @param conv numeric. The convergence criterion of EM algorithm.
+#' @param link logical. If being False, positions on the same chromosomes
+#' as the known QTLs will not be searched.
+#' @param crit numeric. The convergence criterion of EM algorithm.
 #' The E and M steps will be iterated until a convergence criterion
 #' is satisfied.
 #' @param console logical. To decide whether the process of algorithm will
@@ -83,7 +85,7 @@
 #' result$QTL.best
 #' result$effect.best
 MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matrix = NULL, ng = 2, cM = TRUE,
-                       speed = 1, QTLdist = 15, conv = 10^-3, console = TRUE){
+                       speed = 1, QTLdist = 15, link = TRUE, crit = 10^-3, console = TRUE){
 
   if(is.null(QTL) | is.null(marker) | is.null(geno) |  is.null(y)){
     stop("Input data is missing, please cheak and fix.", call. = FALSE)
@@ -138,7 +140,7 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
     datatry <- try(D.matrix*D.matrix, silent=TRUE)
     if(type == "BC"){dn0 <- 2
     } else {dn0 <- 3}
-    if(class(datatry)[1] == "try-error" | NA %in% D.matrix | nrow(D.matrix) != nq^dn0){
+    if(class(datatry)[1] == "try-error" | NA %in% D.matrix | nrow(D.matrix) != dn0^nq){
       stop("Parameter D.matrix error, or the combination of genotypes in design matrix is error.",
            call. = FALSE)
     }
@@ -150,6 +152,7 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
   ng <- round(ng)
 
   if(!cM[1] %in% c(0,1) | length(cM > 1)){cM <- TRUE}
+  if(!link[1] %in% c(0,1) | length(link > 1)){link <- TRUE}
 
   if(!is.numeric(speed) | length(speed) > 1 | min(speed) < 0){
     stop("Parameter speed error, please input a positive number.", call. = FALSE)
@@ -159,8 +162,8 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
     stop("Parameter QTLdist error, please input a bigger positive number.", call. = FALSE)
   }
 
-  if(!is.numeric(conv) | length(conv) > 1 | min(conv) < 0){
-    stop("Parameter conv error, please input a positive number.", call. = FALSE)
+  if(!is.numeric(crit) | length(crit) > 1 | min(crit) < 0){
+    stop("Parameter crit error, please input a positive number.", call. = FALSE)
   }
 
   if(!console[1] %in% c(0,1) | length(console) > 1){console <- TRUE}
@@ -177,8 +180,8 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
   if(console){cat("chr", "cM", "LRT", "log.likelihood", "known QTL", "\n", sep = "\t")}
 
   if(method == "EM"){
-    meth <- function(D.matrix, cp.matrix, y, conv){
-      EM <- EM.MIM(D.matrix, cp.matrix, y, conv = conv, console = FALSE)
+    meth <- function(D.matrix, cp.matrix, y, crit){
+      EM <- EM.MIM(D.matrix, cp.matrix, y, crit = crit, console = FALSE)
       eff <- as.numeric(EM$E.vector)
       mu0 <- as.numeric(EM$beta)
       sigma <- sqrt(as.numeric(EM$variance))
@@ -189,7 +192,7 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
       return(result)
     }
   } else if (method == "REG"){
-    meth <- function(D.matrix, cp.matrix, y, conv){
+    meth <- function(D.matrix, cp.matrix, y, crit){
       X <- cp.matrix%*%D.matrix
       fit <- stats::lm(y~X)
       eff <- as.numeric(fit$coefficients[-1])
@@ -229,9 +232,17 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
 
   effect <- c()
   cr0 <- sort(unique(marker[, 1]))
+  if(!link){
+    cr0 <- cr0[!cr0 %in% QTL[, 1]]
+  }
+  if(length(cr0) < 1){
+    stop("No searchable positions.", call. = FALSE)
+  }
   for(i in cr0){
     cr <- marker[marker[, 1] == i,]
-    QTLs0 <- seq(ceiling(floor(min(cr[,2]))+speed), (max(cr[,2])), speed)
+    minpos <- min(cr[, 2])+speed
+    if(speed%%1 == 0){minpos = ceiling(floor(min(cr[, 2]))+speed)}
+    QTLs0 <- seq(minpos, (max(cr[,2])), speed)
     QTLc0 <- QTL[QTL[, 1] == i,]
     if(ncol(as.matrix(QTLc0))==1){
       QTLc0 = t(as.matrix(QTLc0))
@@ -244,7 +255,7 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
     for(j in QTLs0){
       QTL0 <- rbind(QTL, c(i,j))
       cp0 <- Q.make(QTL0, marker, geno, type = type, ng = ng)$cp.matrix
-      fit0 <- meth(D.matrix, cp0, y, conv)
+      fit0 <- meth(D.matrix, cp0, y, crit)
       effect0 <- c(t(QTL0), fit0[[1]], fit0[[4]], fit0[[5]], fit0[[6]])
 
       LRT0 <- round(effect0[length(effect0)-2], 3)
@@ -268,7 +279,7 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
     bs <- rbind(bs, eff1[b5+1,])
   }
 
-  best <- bs[bs[,ncol(bs)] == max(bs[,ncol(bs)]),]
+  best <- bs[bs[,ncol(bs)-1] == max(bs[,ncol(bs)-1]),]
   QTL.best <- matrix(best[1:(2*nq)], nq, 2, byrow = TRUE)
   colnames(QTL.best) <- c("chromosome", "position(cM)")
   row.names(QTL.best) <- c(paste("QTL", 1:(nq-1)), "QTL new")

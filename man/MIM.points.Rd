@@ -16,7 +16,7 @@ MIM.points(
   cM = TRUE,
   scope = 5,
   speed = 1,
-  conv = 10^-3,
+  crit = 10^-3,
   console = TRUE
 )
 }
@@ -75,7 +75,7 @@ searched.}
 
 \item{speed}{numeric. The walking speed of the QTL search (in cM).}
 
-\item{conv}{numeric. The convergence criterion of EM algorithm.
+\item{crit}{numeric. The convergence criterion of EM algorithm.
 The E and M steps will be iterated until a convergence criterion
 is satisfied.}
 

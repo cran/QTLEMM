@@ -16,7 +16,8 @@ MIM.search(
   cM = TRUE,
   speed = 1,
   QTLdist = 15,
-  conv = 10^-3,
+  link = TRUE,
+  crit = 10^-3,
   console = TRUE
 )
 }
@@ -74,7 +75,10 @@ linked significant QTL. The position near the position of the known
 QTLs under this distance will not be consider as the candidate position
 in the search process.}
 
-\item{conv}{numeric. The convergence criterion of EM algorithm.
+\item{link}{logical. If being False, positions on the same chromosomes
+as the known QTLs will not be searched.}
+
+\item{crit}{numeric. The convergence criterion of EM algorithm.
 The E and M steps will be iterated until a convergence criterion
 is satisfied.}
 

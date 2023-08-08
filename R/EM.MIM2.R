@@ -72,12 +72,15 @@
 #' @param variance0 numeric. The initial value for variance. If
 #' variance0=NULL, the initial value will be the variance of
 #' phenotype values.
-#' @param conv numeric. The convergence criterion of EM algorithm.
+#' @param crit numeric. The convergence criterion of EM algorithm.
 #' The E and M steps will be iterated until a convergence criterion
 #' is satisfied.
 #' @param stop numeric. The stopping criterion of EM algorithm.
 #' The E and M steps will be stop when the iteration number reaches the
 #' stop criterion, and it will treat the algorithm as failing to converge.
+#' @param conv logical. If being False, it will ignore the inability to
+#' converge, and output the last result in the process of EM algorithm
+#' before the stopping criterion.
 #' @param console logical. To decide whether the process of algorithm
 #' will be shown in the R console or not.
 #'
@@ -137,7 +140,7 @@
 EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
                     sele.g = "n", tL = NULL, tR = NULL, type = "RI", ng = 2, cM = TRUE,
                     E.vector0 = NULL, X = NULL, beta0 = NULL, variance0 = NULL,
-                    conv = 10^-5, stop = 1000, console = TRUE){
+                    crit = 10^-5, stop = 1000, conv = TRUE, console = TRUE){
 
   if(is.null(QTL) | is.null(marker) | is.null(geno) | is.null(D.matrix) | is.null(y)){
     stop("Input data is missing, please cheak and fix", call. = FALSE)
@@ -241,7 +244,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
 
     QTL.p <- function(QTL, marker, geno, D.matrix, ys, yu, cM = TRUE, type = "RI", ng = 2,
                       E.vector = NULL, X = NULL, beta = NULL, variance = NULL, cp.matrix = NULL,
-                      conv = 10^-5, stop = 1000, console = FALSE, pf = FALSE){
+                      crit = 10^-5, stop = 1000, conv = TRUE, console = FALSE, pf = FALSE){
       y <- c(ys,yu)
       N <- length(y)
       nu <- length(yu)
@@ -315,7 +318,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       if(console){
         cat("number", "var", effectname, "\n", sep = "\t")
       }
-      while(max(abs(c(Et1-Et,sigt1-sigt))) >= conv & number < stop){
+      while(max(abs(c(Et1-Et,sigt1-sigt))) >= crit & number < stop){
         repeat{
           mut <- mut1
           Et <- Et1
@@ -354,7 +357,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
           }
           L10 <- sum(log(rowSums(Lih10)))
           L1 <- sum(log(rowSums(Lih1)))
-          break(max(abs(c(Et1-Et,sigt1-sigt))) < conv)
+          break(max(abs(c(Et1-Et,sigt1-sigt))) < crit)
         }
         if(console){
           Ep <- round(Et1, 3)
@@ -384,13 +387,15 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       colnames(PI) <- colnames(mp)
 
       if(number == stop){
-        Et1 <- rep(0, length(E.vector))
-        mut1 <- 0
-        sigt1 <- 0
-        PI <- matrix(0, nrow(PI), ncol(PI))
-        like1 <- -Inf
-        LRT <- 0
-        r2 <- 0
+        if(conv){
+          Et1 <- rep(0, length(E.vector))
+          mut1 <- 0
+          sigt1 <- 0
+          PI <- matrix(0, nrow(PI), ncol(PI))
+          like1 <- -Inf
+          LRT <- 0
+          r2 <- 0
+        }
         warning("EM algorithm fails to converge, please check the input data or adjust the convergence criterion.")
       }
 
@@ -414,6 +419,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
   }
   if(is.null(variance)){variance <- stats::var(ya)}
   if(!console[1] %in% c(0,1) | length(console) > 1){console <- TRUE}
+  if(!conv[1] %in% c(0,1) | length(conv) > 1){conv <- TRUE}
 
   datatry <- try(D.matrix%*%E.vector, silent=TRUE)
   if(class(datatry)[1] == "try-error" | NA %in% E.vector){
@@ -430,8 +436,8 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
   }
   sigma <- sqrt(variance)
 
-  if(!is.numeric(conv) | length(conv) > 1 | min(conv) < 0){
-    stop("Parameter conv error, please input a positive number.", call. = FALSE)
+  if(!is.numeric(crit) | length(crit) > 1 | min(crit) < 0){
+    stop("Parameter crit error, please input a positive number.", call. = FALSE)
   }
 
   nQTL <- nrow(QTL)
@@ -589,7 +595,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
     marker <- marker[order(marker[, 1],marker[, 2]),]
     result <- QTL.p(QTL, marker, geno, D.matrix, ys = y, yu = yu, cM = cM, type = type, ng = ng,
                     E.vector = E.vector, X = X, beta = beta, variance = variance,
-                    cp.matrix = cp.matrix, conv = conv, stop = stop, console = console)
+                    cp.matrix = cp.matrix, crit = crit, stop = stop, conv = conv, console = console)
     model <- "proposed model of selective genotyping"
     result[[12]] <- model
     names(result)[12] <- "model"
@@ -598,14 +604,14 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
     marker <- marker[order(marker[, 1], marker[, 2]),]
     result <- QTL.p(QTL, marker, geno, D.matrix, ys = y, yu = yu, cM = cM, type = type, ng = ng,
                     E.vector = E.vector, X = X, beta = beta, variance = variance,
-                    cp.matrix = cp.matrix, conv = conv, stop = stop, console = console, pf = TRUE)
+                    cp.matrix = cp.matrix, crit = crit, stop = stop, conv = conv, console = console, pf = TRUE)
     model <- "population frequency-based model of selective genotyping"
     result[[12]] <- model
     names(result)[12] <- "model"
   } else if (sele.g == "t"){
     QTL.t <- function(QTL, marker, geno, D.matrix, ys, yu, tL, tR, cM = TRUE, type = "RI", ng = 2,
                       E.vector = NULL, beta = NULL,  X=NULL, variance = NULL, cp.matrix = NULL,
-                      conv = 10^-5, stop = 1000, console = FALSE){
+                      crit = 10^-5, stop = 1000, conv =TRUE, console = FALSE){
       maxit <- stop
       nS <- length(ys)
       nType <- nrow(D.matrix)
@@ -701,7 +707,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
         Et[iter,] <- E
         Mt[iter] <- mu0
         St[iter] <- sigma
-        if (max(abs(c(E-E0, mu0-mu1, sigma-sigma0))) < conv){
+        if (max(abs(c(E-E0, mu0-mu1, sigma-sigma0))) < crit){
           break()
         }
         if(iter == maxit){
@@ -727,6 +733,19 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       y.hat <- Pi%*%D.matrix%*%Et1+X%*%mut1
       r2 <- stats::var(y.hat)/stats::var(ys)
 
+      if(number == stop){
+        if(conv){
+          E.vector <- rep(0, length(E.vector))
+          beta <- 0
+          variance <- 0
+          PI.matrix <- matrix(0, nrow(PI.matrix), ncol(PI.matrix))
+          like1 <- -Inf
+          LRT <- 0
+          r2 <- 0
+        }
+        warning("EM algorithm fails to converge, please check the input data or adjust the convergence criterion and stopping criterion.")
+      }
+
       output <- list(QTL = QTL, E.vector = Et1, beta = mut1, variance = sigt1, PI.matrix = Pi,
                      log.likelihood = like1, LRT = LRT, R2 = r2, y.hat = y.hat, yu.hat = NULL,
                      iteration.number = number)
@@ -739,7 +758,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
     if(is.null(tR)){tR <- max(yu)}
     result <- QTL.t(QTL, marker, geno, D.matrix, ys = y, yu = yu, tL, tR, cM = cM, type = type, ng = ng,
                     E.vector = E.vector, beta = beta, X = X, variance = variance,
-                    cp.matrix = cp.matrix, conv = conv, console = console)
+                    cp.matrix = cp.matrix, crit = crit, stop = stop, conv = conv, console = console)
     model <- "truncated model of selective genotyping"
     result[[12]] <- model
     names(result)[12] <- "model"
@@ -748,7 +767,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       cp.matrix <- Q.make(QTL, marker, geno, cM = cM, type = type, ng = ng)[[(nrow(QTL)+1)]]
     }
     re <- EM.MIM(D.matrix, cp.matrix, y, E.vector0 = E.vector, X = X, beta0 = beta, variance0 = variance,
-                 conv = conv, stop = stop, console = console)
+                 crit = crit, stop = stop, conv = conv, console = console)
     result <- list(QTL = QTL, E.vector = re[[1]], beta = re[[2]], variance = re[[3]], PI.matrix = re[[4]],
                    log.likelihood = re[[5]], LRT = re[[6]], R2 = re[[7]], y.hat = re[[8]], yu.hat = NULL,
                    iteration.number = re[[9]], model = "complete genotyping model")

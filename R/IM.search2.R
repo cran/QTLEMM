@@ -54,7 +54,7 @@
 #' @param cM logical. Specify the unit of marker position. cM=TRUE for
 #' centi-Morgan. Or cM=FALSE for Morgan.
 #' @param speed numeric. The walking speed of the QTL search (in cM).
-#' @param conv numeric. The convergent criterion of EM algorithm.
+#' @param crit numeric. The convergent criterion of EM algorithm.
 #' The E and M steps will be iterated until a convergent criterion
 #' is satisfied.
 #' @param d.eff logical. Specify whether the dominant effect will be
@@ -121,10 +121,10 @@
 #'
 #' # run and result
 #' result <- IM.search2(marker, geno.s, ys, yu, sele.g = "p", type = "RI", ng = 2,
-#' speed = 7.5, conv = 10^-3, LRT.thre = 10)
+#' speed = 7.5, crit = 10^-3, LRT.thre = 10)
 #' result$detect.QTL
 IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR = NULL, method = "EM",
-                       type = "RI", D.matrix = NULL, ng = 2, cM = TRUE, speed = 1, conv = 10^-5,
+                       type = "RI", D.matrix = NULL, ng = 2, cM = TRUE, speed = 1, crit = 10^-5,
                        d.eff = FALSE, LRT.thre = TRUE, simu = 1000, alpha = 0.05, detect = TRUE,
                        QTLdist = 15, plot.all = TRUE, plot.chr = TRUE, console = TRUE){
 
@@ -212,8 +212,8 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
     stop("Parameter speed error, please input a positive number.", call. = FALSE)
   }
 
-  if(!is.numeric(conv) | length(conv) > 1 | min(conv) < 0){
-    stop("Parameter conv error, please input a positive number.", call. = FALSE)
+  if(!is.numeric(crit) | length(crit) > 1 | min(crit) < 0){
+    stop("Parameter crit error, please input a positive number.", call. = FALSE)
   }
 
   if(!d.eff[1] %in% c(0,1) | length(d.eff) > 1){d.eff <- TRUE}
@@ -261,9 +261,9 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
   }
 
   if(method == "EM"){
-    meth <- function(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, conv){
+    meth <- function(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, crit){
       EM <- EM.MIM2(QTL, marker, geno, D.matrix, y = y, yu = yu, tL = tL, tR = tR, type = type,
-                    ng = ng, sele.g = sele.g, conv = conv, console = FALSE)
+                    ng = ng, sele.g = sele.g, crit = crit, console = FALSE)
       eff <- as.numeric(EM$E.vector)
       mu0 <- as.numeric(EM$beta)
       sigma <- sqrt(as.numeric(EM$variance))
@@ -427,7 +427,7 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
       return(re)
     }
 
-    meth <- function(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng,sele.g, conv){
+    meth <- function(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng,sele.g, crit){
       mp <- switch(sele.g,
                    p = mixprop(QTL, length(yu), marker, geno, model = 1, cM = cM, type = type, ng = ng)[[2]],
                    t = mixprop(QTL, length(yu), marker, geno, model = 2, cM = cM, type = type, ng = ng)[[2]],
@@ -465,10 +465,12 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
   cr0 <- unique(marker[, 1])
   for(i in cr0){
     cr <- marker[marker[, 1] == i,]
-    for(j in seq(ceiling(floor(min(cr[,2]))+speed),(max(cr[, 2])), speed)){
+    minpos <- min(cr[, 2])+speed
+    if(speed%%1 == 0){minpos = ceiling(floor(min(cr[, 2]))+speed)}
+    for(j in seq(minpos, (max(cr[, 2])), speed)){
       QTL <- matrix(c(i, j), 1, 2)
 
-      result <- meth(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, conv)
+      result <- meth(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, crit)
       eff <- result[[1]]
       mu0 <- result[[2]]
       sigma <- result[[3]]
@@ -523,8 +525,10 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
     detect.QTL <- detectQTL(effect, LRT.threshold, QTLdist)
   }
 
-  oldpar <- graphics::par(no.readonly = TRUE)
-  on.exit(graphics::par(oldpar))
+  if(plot.chr | plot.all){
+    oldpar <- graphics::par(no.readonly = TRUE)
+    on.exit(graphics::par(oldpar))
+  }
 
   nc0 <- length(cr0)
   if(plot.chr | (nc0 == 1 & plot.all)){

@@ -66,7 +66,7 @@
 #' is fixed, and the position of its surrounding positions will not be
 #' searched.
 #' @param speed numeric. The walking speed of the QTL search (in cM).
-#' @param conv numeric. The convergence criterion of EM algorithm.
+#' @param crit numeric. The convergence criterion of EM algorithm.
 #' The E and M steps will be iterated until a convergence criterion
 #' is satisfied.
 #' @param console logical. To decide whether the process of algorithm will
@@ -113,7 +113,7 @@
 #' result$QTL.best
 #' result$effect.best
 MIM.points2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR = NULL, method = "EM",
-                       type = "RI", D.matrix = NULL, ng = 2, cM = TRUE, scope = 5, speed = 1, conv = 10^-3,
+                       type = "RI", D.matrix = NULL, ng = 2, cM = TRUE, scope = 5, speed = 1, crit = 10^-3,
                        console = TRUE){
 
   if(is.null(QTL) | is.null(marker) | is.null(geno) |  is.null(y)){
@@ -222,8 +222,8 @@ MIM.points2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
     scope <- rep(scope[1],nq)
   }
 
-  if(!is.numeric(conv) | length(conv) > 1 | min(conv) < 0){
-    stop("Parameter conv error, please input a positive number.", call. = FALSE)
+  if(!is.numeric(crit) | length(crit) > 1 | min(crit) < 0){
+    stop("Parameter crit error, please input a positive number.", call. = FALSE)
   }
 
   if(!console[1] %in% c(0,1) | length(console) > 1){console <- TRUE}
@@ -242,10 +242,7 @@ MIM.points2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
     for(i in 2:nq){
       q0 <- QTL[i, 2]
       r0 <- union(seq(q0-scope[i], q0, speed), seq(q0, q0+scope[i], speed))
-      r0 <- r0[r0 > min(marker[marker[, 1] == ch0[1], 2]) & r0 < max(marker[marker[, 1] == ch0[1], 2])]
-      if(ch0[i] == ch0[i-1]){
-        r0 <- r0[r0 > max(sr[[i-1]])]
-      }
+      r0 <- r0[r0 > min(marker[marker[, 1] == ch0[i], 2]) & r0 < max(marker[marker[, 1] == ch0[i], 2])]
       sr[[i]] <- r0
     }
   }
@@ -265,9 +262,9 @@ MIM.points2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
   if(console){cat("#", t(name0), "LRT", "log.likelihood", "\n", sep = "\t")}
 
   if(method == "EM"){
-    meth <- function(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, conv){
+    meth <- function(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, crit){
       EM <- EM.MIM2(QTL, marker, geno, D.matrix, y = y, yu = yu, tL = tL, tR = tR, type = type,
-                    ng = ng, sele.g = sele.g, conv = conv, console = FALSE)
+                    ng = ng, sele.g = sele.g, crit = crit, console = FALSE)
       eff <- as.numeric(EM$E.vector)
       mu0 <- as.numeric(EM$beta)
       sigma <- sqrt(as.numeric(EM$variance))
@@ -432,7 +429,7 @@ MIM.points2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
       return(re)
     }
 
-    meth <- function(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng,sele.g, conv){
+    meth <- function(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng,sele.g, crit){
       mp <- switch(sele.g,
                    p = mixprop(QTL, length(yu), marker, geno, model = 1, cM = cM, type = type, ng = ng)[[2]],
                    t = mixprop(QTL, length(yu), marker, geno, model = 2, cM = cM, type = type, ng = ng)[[2]],
@@ -470,7 +467,7 @@ MIM.points2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
   effect <- matrix(NA, nrow(sm), 2*nq+ncol(D.matrix)+3)
   for(i in 1:nrow(sm)){
     QTL0 <- cbind(ch0, sm[i,])
-    fit0 <- meth(QTL0, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, conv)
+    fit0 <- meth(QTL0, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, crit)
     effect0 <- c(t(QTL0), fit0[[1]], fit0[[4]], fit0[[5]], fit0[[6]])
     model <- fit0[[7]]
 

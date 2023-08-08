@@ -46,7 +46,7 @@
 #' is fixed, and the position of its surrounding positions will not be
 #' searched.
 #' @param speed numeric. The walking speed of the QTL search (in cM).
-#' @param conv numeric. The convergence criterion of EM algorithm.
+#' @param crit numeric. The convergence criterion of EM algorithm.
 #' The E and M steps will be iterated until a convergence criterion
 #' is satisfied.
 #' @param console logical. To decide whether the process of algorithm will
@@ -83,7 +83,7 @@
 #' result$QTL.best
 #' result$effect.best
 MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matrix = NULL, ng = 2, cM = TRUE,
-                      scope = 5, speed = 1, conv = 10^-3, console = TRUE){
+                      scope = 5, speed = 1, crit = 10^-3, console = TRUE){
 
   if(is.null(QTL) | is.null(marker) | is.null(geno) |  is.null(y)){
     stop("Input data is missing, please cheak and fix.", call. = FALSE)
@@ -165,8 +165,8 @@ MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
     scope <- rep(scope[1],nq)
   }
 
-  if(!is.numeric(conv) | length(conv) > 1 | min(conv) < 0){
-    stop("Parameter conv error, please input a positive number.", call. = FALSE)
+  if(!is.numeric(crit) | length(crit) > 1 | min(crit) < 0){
+    stop("Parameter crit error, please input a positive number.", call. = FALSE)
   }
 
   if(!console[1] %in% c(0,1) | length(console) > 1){console <- TRUE}
@@ -185,10 +185,7 @@ MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
     for(i in 2:nq){
       q0 <- QTL[i, 2]
       r0 <- union(seq(q0-scope[i], q0, speed), seq(q0, q0+scope[i], speed))
-      r0 <- r0[r0 > min(marker[marker[, 1] == ch0[1], 2]) & r0 < max(marker[marker[, 1] == ch0[1], 2])]
-      if(ch0[i] == ch0[i-1]){
-        r0 <- r0[r0 > max(sr[[i-1]])]
-      }
+      r0 <- r0[r0 > min(marker[marker[, 1] == ch0[i], 2]) & r0 < max(marker[marker[, 1] == ch0[i], 2])]
       sr[[i]] <- r0
     }
   }
@@ -208,8 +205,8 @@ MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
   if(console){cat("#", t(name0), "LRT", "log.likelihood", "\n", sep = "\t")}
 
   if(method == "EM"){
-    meth <- function(D.matrix, cp.matrix, y, conv){
-      EM <- EM.MIM(D.matrix, cp.matrix, y, conv = conv, console = FALSE)
+    meth <- function(D.matrix, cp.matrix, y, crit){
+      EM <- EM.MIM(D.matrix, cp.matrix, y, crit = crit, console = FALSE)
       eff <- as.numeric(EM$E.vector)
       mu0 <- as.numeric(EM$beta)
       sigma <- sqrt(as.numeric(EM$variance))
@@ -220,7 +217,7 @@ MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
       return(result)
     }
   } else if (method == "REG"){
-    meth <- function(D.matrix, cp.matrix, y, conv){
+    meth <- function(D.matrix, cp.matrix, y, crit){
       X <- cp.matrix%*%D.matrix
       fit <- stats::lm(y~X)
       eff <- as.numeric(fit$coefficients[-1])
@@ -254,7 +251,7 @@ MIM.points <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
   for(i in 1:nrow(sm)){
     QTL0 <- cbind(ch0, sm[i,])
     cp0 <- Q.make(QTL0, marker, geno, type = type, ng = ng)$cp.matrix
-    fit0 <- meth(D.matrix, cp0, y, conv)
+    fit0 <- meth(D.matrix, cp0, y, crit)
     effect0 <- c(t(QTL0), fit0[[1]], fit0[[4]], fit0[[5]], fit0[[6]])
 
     LRT <- round(effect0[length(effect0)-2], 3)
