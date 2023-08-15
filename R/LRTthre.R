@@ -7,7 +7,7 @@
 #' where the row dimension k is the number of markers in the chromosomes.
 #' The first column labels the chromosomes where the markers are located,
 #' and the second column labels the positions of QTLs (in morgan (M) or
-#' centimorgan (cM)). Note that chromosome and position must be divided
+#' centimorgan (cM)). Note that chromosomes and positions must be divided
 #' in order.
 #' @param type character. The population type of the dataset. Include
 #' backcross (type="BC"), advanced intercross population (type="AI"), and
@@ -16,12 +16,12 @@
 #' example, the BC1 population is type="BC" with ng=1; the AI F3
 #' population is type="AI" with ng=3.
 #' @param cM logical. Specify the unit of marker position. cM=TRUE for
-#' centi-Morgan. Or cM=FALSE for Morgan.
+#' centimorgan. Or cM=FALSE for morgan.
 #' @param ns integer. The number of individuals for generating the
-#' individual trait values. The changes in this values do not affect
+#' individual trait values. The change in this value do not affect
 #' the outcome of the LRT threshold value significantly.
 #' @param gv numeric. The genetic variance for generating the
-#' individual trait values. The changes in this values do not affect
+#' individual trait values. The change in this value do not affect
 #' the outcome of the LRT threshold value significantly.
 #' @param speed numeric. The walking speed of the QTL analysis (in cM).
 #' @param simu integer. To decide how many simulation samples will be used
@@ -29,8 +29,8 @@
 #' @param d.eff logical. Specify whether the dominant effect will be
 #' considered in the parameter estimation or not for AI or RI population.
 #' @param alpha numeric. The type I error rate for the LRT threshold.
-#' @param console logical. To decide whether the process of algorithm will
-#' be shown in the R console or not.
+#' @param console logical. To decide whether the process of the algorithm
+#' will be shown in the R console or not.
 #'
 #' @return
 #'

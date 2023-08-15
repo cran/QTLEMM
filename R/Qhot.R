@@ -2,14 +2,14 @@
 #'
 #' This function produces both the numerical and graphical summaries of
 #' the QTL hotspot detection in the genomes that are available on the
-#' worldwide web including the flanking markers of QTLs.
+#' web including the flanking markers of QTLs.
 #'
-#' @param DataQTL data.frame. A data-frame with 5 columns for QTL
+#' @param DataQTL data.frame. A data frame with 5 columns for QTL
 #' information. The first three columns denote the serial number of
 #' QTLs, trait names, and the chromosome numbers. The 4th and 5th denote
 #' the flanking marker positions(cM) of QTLs.
-#' @param DataCrop data.frame. A data-frame with 3 columns for chromosome
-#' information consisting of the names, center positions(cM) and lengths
+#' @param DataCrop data.frame. A data frame with 3 columns for chromosome
+#' information consists of the names, center positions(cM) and lengths
 #' of chromosomes.
 #' @param ScanStep numeric. A value for the length(cM) of every bin.
 #' @param NH integer. A value for the number of spurious hotspots in the
@@ -23,12 +23,12 @@
 #' @return
 #' \item{EQF}{The expected QTL frequency(EQF) in every bin per chromosome.}
 #' \item{P.threshold}{The EQF thresholds for proposed method.}
-#' \item{Q.threshold}{The EQF thresholds for Q method.}
-#' \item{nHot}{The numbers of detected hotspots per chromosome for proposed
+#' \item{Q.threshold}{The EQF thresholds for the Q method.}
+#' \item{nHot}{The numbers of detected hotspots per chromosome for the proposed
 #' method and Q method.}
 #'
-#' Graphical outputs for visualizing the summarized results including the
-#' expected QTL frequency of scan steps, the composition of QTLs for
+#' Graphical outputs for visualizing the summarized results includes the
+#' expected QTL frequency of scan steps, and the composition of QTLs for
 #' different traits in the detected hotspots.
 #'
 #' @note

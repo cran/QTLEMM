@@ -35,19 +35,19 @@ IM.search2(
 where the row dimension k is the number of markers in the chromosomes.
 The first column labels the chromosomes where the markers are located,
 and the second column labels the positions of QTLs (in morgan (M) or
-centimorgan (cM)). Note that chromosome and position must be divided
+centimorgan (cM)). Note that chromosomes and positions must be divided
 in order.}
 
 \item{geno}{matrix. A n*k matrix contains the k markers of the n
 individuals. The marker genotypes of P1 homozygote (MM),
-heterozygote (Mm) and P2 homozygote (mm) are coded as 2, 1 and 0,
+heterozygote (Mm), and P2 homozygote (mm) are coded as 2, 1, and 0,
 respectively, and NA for missing value.}
 
 \item{y}{vector. A vector that contains the phenotype values of
-individuals with genotyped.}
+individuals with genotypes.}
 
 \item{yu}{vector. A vector that contains the phenotype value
-of the individuals without genotyped.}
+of the individuals without genotypes.}
 
 \item{sele.g}{character. If sele.g="n", it will consider that the
 data is not a selective genotyping data but the complete genotyping
@@ -61,12 +61,12 @@ analyze. Note that the yu must be input when sele.g="p" of "f".}
 
 \item{tL}{numeric. The lower truncation point of phenotype value
 when sele.g="t". Note that when sele.g="t" and tL=NULL, the yu
-must be input and the function will consider the minimum of yu
+must be input, and the function will consider the minimum of yu
 as the lower truncation point.}
 
 \item{tR}{numeric. The upper truncation point of phenotype value
 when sele.g="t". Note that when sele.g="t" and tR=NULL, the yu
-must be input and the function will consider the maximum of yu
+must be input, and the function will consider the maximum of yu
 as the upper truncation point.}
 
 \item{method}{character. method="EM" means the interval mapping method
@@ -79,24 +79,24 @@ backcross (type="BC"), advanced intercross population (type="AI"), and
 recombinant inbred population (type="RI").}
 
 \item{D.matrix}{matrix. The design matrix of the IM model. If
-D.matrix=NULL, the design matrix will be the constructed using the
-Cockerham’s model. In BC population, it is a 2*1 matrix which contains
-0.5, -0.5 for additive effect. In RI or AI population, it is a 3*2 matrix
-which contains  1, 0, -1 for additive effect and 0.5, -0.5, 0.5 for
-dominant effect.}
+D.matrix=NULL, the design matrix will be constructed using the Cockerham’s
+model. In BC population, it is a 2*1 matrix which is 0.5, -0.5 for
+additive effect. In RI or AI population, it is a 3*2 matrix whose first
+column is 1, 0, -1 for additive effect and the second column is 0.5, -0.5,
+0.5 for dominant effect.}
 
 \item{ng}{integer. The generation number of the population type. For
 example, the BC1 population is type="BC" with ng=1; the AI F3
 population is type="AI" with ng=3.}
 
 \item{cM}{logical. Specify the unit of marker position. cM=TRUE for
-centi-Morgan. Or cM=FALSE for Morgan.}
+centimorgan. Or cM=FALSE for morgan.}
 
 \item{speed}{numeric. The walking speed of the QTL search (in cM).}
 
 \item{crit}{numeric. The convergent criterion of EM algorithm.
 The E and M steps will be iterated until a convergent criterion
-is satisfied.}
+is satisfied. It must be between 0 and 1.}
 
 \item{d.eff}{logical. Specify whether the dominant effect will be
 considered in the parameter estimation or not for AI or RI population.}
@@ -104,10 +104,11 @@ considered in the parameter estimation or not for AI or RI population.}
 \item{LRT.thre}{logical or numeric. If being TRUE, the LRT threshold
 will be computed based on the Gaussian stochastic process
 (Kao and Ho 2012). Or users can input a numerical value as the LRT
-threshold to assessing the significance of QTL detection.}
+threshold to assess the significance of QTL detection.}
 
 \item{simu}{integer. To decide how many simulation samples will be used
-to compute the LRT threshold using the Gaussian process.}
+to compute the LRT threshold using the Gaussian process. It must be
+between 50 and 10^8.}
 
 \item{alpha}{numeric. The type I error rate for the LRT threshold.}
 
@@ -124,8 +125,8 @@ statistics for the genome in one figure.}
 \item{plot.chr}{logical. If being TRUE, output the profile of LRT
 statistics for the chromosomes.}
 
-\item{console}{logical. To decide whether the process of algorithm will
-be shown in the R console or not.}
+\item{console}{logical. To decide whether the process of the algorithm
+will be shown in the R console or not.}
 }
 \value{
 \item{effect}{The estimated effects and LRT statistics of all positions.}
@@ -139,8 +140,8 @@ Graphical outputs including LOD value and effect of each position.
 }
 \description{
 Expectation-maximization algorithm for QTL interval mapping to search
-the possible position of QTL in all chromosome. This function can
-handle the genotype data witch is selective genotyping.
+the possible position of QTL in all chromosomes. This function can
+handle the genotype data is selective genotyping.
 }
 \examples{
 # load the example data

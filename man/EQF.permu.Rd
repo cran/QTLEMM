@@ -21,25 +21,25 @@ LOD.QTLdetect.}
 \item{alpha}{numeric. The type 1 error rate of detecting the hotspot.}
 
 \item{Q}{logical. If being TURE, the function will further be carrying
-out the population of Q method as the control group and shown as B in
-the output.}
+out the population of the Q method as the control group and shown as B
+in the output.}
 
-\item{console}{logical. To decide whether the process of algorithm will
-be shown in the R console or not.}
+\item{console}{logical. To decide whether the process of the algorithm
+will be shown in the R console or not.}
 }
 \value{
-\item{EQF.matrix}{The matrix denote the EQF value of each bin.}
-\item{bin}{The bin infromation matrix used in this analyze.}
-\item{LOD.threshole}{The LOD threshold used in this analyze.}
+\item{EQF.matrix}{The matrix denotes the EQF value of each bin.}
+\item{bin}{The bin information matrix used in this analysis.}
+\item{LOD.threshole}{The LOD threshold used in this analysis.}
 \item{cluster.number}{The number of QTLs in each cluster group.}
 \item{cluster.id}{The serial number of traits in each cluster group.}
 \item{cluster.matrix}{The new EQF matrix from the clustering process.}
-\item{permu.matrix.cluster}{the permutation result of the clustering
-method which has been sorted by order.}
-\item{permu.matrix.Q}{The permutation result of the Q method which has
+\item{permu.matrix.cluster}{The permutation result of the clustering
+method, which has been sorted by order.}
+\item{permu.matrix.Q}{The permutation result of the Q method, which has
 been sorted by order.}
-\item{EQF.threshold}{The EQF threshold calculated from the permutation
-process.}
+\item{EQF.threshold}{The EQF threshold is calculated from the
+permutation process.}
 }
 \description{
 The EQF matrix cluster permutation process for QTL hotspot detection.

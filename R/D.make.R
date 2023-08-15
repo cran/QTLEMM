@@ -5,12 +5,12 @@
 #' @param nQTL integer. The number of QTLs.
 #' @param type character. The population type of the dataset. Include
 #' backcross (type="BC"), advanced intercross population (type="AI"), and
-#' recombinant inbred population (type="RI").
-#' @param a integer or vector. A integer or vecter to decide the additive
+#' recombinant inbred population (type="RI"). The default is type="RI".
+#' @param a integer or vector. A integer or vector to decide the additive
 #' effects of which QTL will be considered in this design matrix. If
 #' a=TRUE, the additive effect of all QTLs will be considered. If
 #' a=FALSE, no additive effect will be considered.
-#' @param d integer or vector. A integer or vecter to decide the dominant
+#' @param d integer or vector. A integer or vector to decide the dominant
 #' effects of which QTL will be considered in this design matrix. If
 #' d=TRUE, the dominant effect of all QTLs will be considered.If
 #' d=FALSE, no dominant effect will be considered.
@@ -18,32 +18,32 @@
 #' format can be used in this parameter. One format is vector, in which
 #' every two elements indicate a combination of additive-by-additive
 #' interaction. The other format is a 2*i matrix, where i is the number
-#' of combination of interaction, and each column indicates the two
-#' interacting QTL. Besides, if aa=TRUE, all combinations of
-#' additive-by-additive interaction will be considered. If aa=FALSE,, no
+#' of combinations of interaction, and each column indicates the two
+#' interacting QTLs. Besides, if aa=TRUE, all combinations of
+#' additive-by-additive interaction will be considered. If aa=FALSE, no
 #' additive-by-additive interaction will be considered.
 #' @param dd vector or matrix. The dominant-by-dominant interaction. The
 #' format is the same as that in aa.
 #' @param ad vector or matrix. The additive-by-dominant interaction. The
 #' format is the same as that in aa. Note that, in each pair of QTLs, the
-#' first element indicates the additive effect, and the second element
-#' indicates the dominant effect.
+#' first element indicates the additive effect, and the second indicates
+#' the dominant effect.
 #'
 #' @return
 #' The genetic design matrix, whose elements are the coded variables of
-#' the QTL effects. it is a g*p matrix, where g is the number of possible
+#' the QTL effects. It is a g*p matrix, where g is the number of possible
 #' QTL genotypes, and p is the number of effects in the MIM model.
 #'
 #' @note
-#' For parameter type, if type="BC", the design matrix contain only
+#' For parameter type, if type="BC", the design matrix contains only
 #' additive effect and additive by additive interaction. If type="AI" or
 #' type="RI", that will contain additive and dominance effects and all
 #' interaction.
 #'
-#' For example of parameter aa, when aa=c(1,3,2,4,5,6), indicates that the
-#' interaction between QTL1 and QTL3, the interaction between QTL2 and QTL4,
-#' and that between QTL5 and QTL6 will be considered in the design matrix.
-#' Beside, the matrix format can expressed as aa=matrix(c(1,3,2,4,5,6),2,3).
+#' For example, when aa=c(1,3,2,4,5,6), indicates that the interaction
+#' between QTL1 and QTL3, the interaction between QTL2 and QTL4, and that
+#' between QTL5 and QTL6 will be considered in the design matrix. Besides,
+#' the matrix format can be expressed as aa=matrix(c(1,3,2,4,5,6),2,3).
 #' The parameters DD and AD are also expressed in the same way.
 #'
 #' @export
@@ -59,7 +59,10 @@
 #'
 #' @examples
 #' D.make(4, d = c(1,3,4), aa = c(1,2,2,3), dd = c(1,3,1,4), ad = c(1,2,2,1,2,3,3,4))
-#' D.make(5, type = "BC", a = c(1,3,4,5), aa = c(1,2,3,4,4,5))
+#'
+#' aa <- matrix(c(1,2,3,4,4,5), 2, 3)
+#' aa
+#' D.make(5, type = "BC", a = c(1,3,4,5), aa = aa)
 D.make <- function(nQTL, type = "RI", a = TRUE, d = TRUE, aa = FALSE, dd = FALSE, ad = FALSE){
 
   if(!is.numeric(nQTL) | length(nQTL) != 1 | min(nQTL) < 0){
@@ -133,7 +136,13 @@ D.make <- function(nQTL, type = "RI", a = TRUE, d = TRUE, aa = FALSE, dd = FALSE
 
   if(nQTL > 1){
     if(!0 %in% aa){
-      aa <- c(aa)
+      if(length(dim(aa)) > 0){
+        if(dim(aa)[1] == 2){
+          aa <- c(aa)
+        } else {
+          stop("Epistasis effects setting error, please check the parameters of epistasis effects.", call. = F)
+        }
+      }
       if("TRUE" %in% as.character(aa) | "T" %in% as.character(aa)){
         aa <- utils::combn(nQTL, 2)
       } else {
@@ -152,7 +161,13 @@ D.make <- function(nQTL, type = "RI", a = TRUE, d = TRUE, aa = FALSE, dd = FALSE
     } else {aa <- NULL}
     if(type != "BC"){
       if(!0 %in% dd){
-        dd <- c(dd)
+        if(length(dim(dd)) > 0){
+          if(dim(dd)[1] == 2){
+            dd <- c(dd)
+          } else {
+            stop("Epistasis effects setting error, please check the parameters of epistasis effects.", call. = F)
+          }
+        }
         if("TRUE" %in% as.character(dd) | "T" %in% as.character(dd)){
           dd <- utils::combn(nQTL, 2)
         } else {
@@ -170,7 +185,13 @@ D.make <- function(nQTL, type = "RI", a = TRUE, d = TRUE, aa = FALSE, dd = FALSE
         }
       } else {dd <- NULL}
       if(!0 %in% ad){
-        ad <- c(ad)
+        if(length(dim(ad)) > 0){
+          if(dim(ad)[1] == 2){
+            ad <- c(ad)
+          } else {
+            stop("Epistasis effects setting error, please check the parameters of epistasis effects.", call. = F)
+          }
+        }
         if("TRUE" %in% as.character(ad) | "T" %in% as.character(ad)){
           ad <- t(utils::combn(nQTL, 2))
           ad <- rbind(ad, cbind(ad[, 2], ad[, 1]))

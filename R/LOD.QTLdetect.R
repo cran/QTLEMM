@@ -1,33 +1,33 @@
 #' QTL Detect by LOD
 #'
-#' Detect QTL by likelihood of odds(LOD) matrix.
+#' Detect QTL by the likelihood of odds(LOD) matrix.
 #'
-#' @param LOD matrix. The LOD matrix which is a t*p matrix, where t is
-#' the number of traits and p is the number of bins on the chromosomes.
+#' @param LOD matrix. The LOD matrix is a t*p matrix, where t is the
+#' number of traits and p is the number of bins on the chromosomes.
 #' The missing value should be NA.
-#' @param bin matrix. A n*2 matrix represent how many bins on each
+#' @param bin matrix. A n*2 matrix represents how many bins are on each
 #' chromosome, where n is the number of chromosomes. The first column
 #' denotes the chromosome number, and the second column denote how many
-#' bins on that chromosome. Note that chromosome and must be divided
+#' bins are on that chromosome. Note that chromosomes must be divided
 #' in order.
 #' @param thre numeric. The LOD threshold. The LOD score under this
 #' threshold will be calculated as 0.
 #' @param QTLdist numeric. The minimum distance (bin) among different
 #' linked significant QTL.
-#' @param console logical. To decide whether the process of algorithm will
-#' be shown in the R console or not.
+#' @param console logical. To decide whether the process of the algorithm
+#' will be shown in the R console or not.
 #'
 #' @return
 #' \item{detect.QTL.number}{The number of detected QTL in each trait.}
 #' \item{QTL.matrix}{The QTL position matrix. Where the elements 1
-#' donate the position of QTL; elements 0 donate the bins whose LOD
-#' score is under the LOD threshold; other positions is shown as NA.}
-#' \item{EQF.matrix}{The matrix denote the EQF value of each bin.}
+#' donates the position of QTL; elements 0 donate the bins whose LOD
+#' score is under the LOD threshold; other positions are shown as NA.}
+#' \item{EQF.matrix}{The matrix denotes the EQF value of each bin.}
 #' \item{linkage.QTL.number}{The linkage QTL number of all detected
-#' QTL. In other words, it is the table denote how many QTL on one
-#' chromosome.}
-#' \item{LOD.threshole}{The LOD threshold used in this analyze.}
-#' \item{bin}{The bin infromation matrix used in this analyze.}
+#' QTL. In other words, it is the table that denote how many QTL are
+#' on one chromosome.}
+#' \item{LOD.threshole}{The LOD threshold used in this analysis.}
+#' \item{bin}{The bin information matrix used in this analysis.}
 #'
 #' @export
 #'

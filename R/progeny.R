@@ -7,13 +7,13 @@
 #' the row dimension q is the number of QTLs in the chromosomes. The
 #' first column labels the chromosomes where the QTLs are located, and
 #' the second column labels the positions of QTLs (in morgan (M) or
-#' centimorgan (cM)). Note that chromosome and position must be divided
+#' centimorgan (cM)). Note that chromosomes and positions must be divided
 #' in order.
 #' @param marker matrix. A k*2 matrix contains the marker information,
 #' where the row dimension k is the number of markers in the chromosomes.
 #' The first column labels the chromosomes where the markers are located,
 #' and the second column labels the positions of QTLs (in morgan (M) or
-#' centimorgan (cM)). Note that chromosome and position must be divided
+#' centimorgan (cM)). Note that chromosomes and positions must be divided
 #' in order.
 #' @param type character. The population type of the dataset. Include
 #' backcross (type="BC"), advanced intercross population (type="AI"), and

@@ -7,7 +7,7 @@
 #' the row dimension q is the number of QTLs in the chromosomes. The
 #' first column labels the chromosomes where the QTLs are located, and
 #' the second column labels the positions of QTLs (in morgan (M) or
-#' centimorgan (cM)). Note that chromosome and position must be divided
+#' centimorgan (cM)). Note that chromosomes and positions must be divided
 #' in order.
 #' @param marker matrix. A k*2 matrix contains the marker information,
 #' where the row dimension k is the number of markers in the chromosomes.
@@ -17,7 +17,7 @@
 #' in order.
 #' @param geno matrix. A n*k matrix contains the k markers of the n
 #' individuals. The marker genotypes of P1 homozygote (MM),
-#' heterozygote (Mm) and P2 homozygote (mm) are coded as 2, 1 and 0,
+#' heterozygote (Mm), and P2 homozygote (mm) are coded as 2, 1, and 0,
 #' respectively, and NA for missing value.
 #' @param interval logical. When the QTL with the same position of a
 #' marker, whether the marker will be skipped and not be regarded as a
@@ -30,7 +30,7 @@
 #' example, the BC1 population is type="BC" with ng=1; the AI F3
 #' population is type="AI" with ng=3.
 #' @param cM logical. Specify the unit of marker position. cM=TRUE for
-#' centi-Morgan. Or cM=FALSE for Morgan.
+#' centimorgan. Or cM=FALSE for morgan.
 #'
 #' @return
 #' The output contains k conditional probability matrices for the k

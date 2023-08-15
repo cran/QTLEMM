@@ -20,8 +20,8 @@ EQF values over the bins of each chromosome.}
 One or several EQF plots.
 }
 \description{
-Depict the EQF plot by the result of permutation process to detect
-the QTL hotspot.
+Depict the EQF plot by the result of the permutation process to
+detect the QTL hotspot.
 }
 \examples{
 # load the example data
