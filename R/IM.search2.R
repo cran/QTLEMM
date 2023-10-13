@@ -122,7 +122,7 @@
 #'
 #' # run and result
 #' result <- IM.search2(marker, geno.s, ys, yu, sele.g = "p", type = "RI", ng = 2,
-#' speed = 7.5, crit = 10^-3, LRT.thre = 10)
+#' speed = 7, crit = 10^-3, LRT.thre = 10)
 #' result$detect.QTL
 IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR = NULL, method = "EM",
                        type = "RI", D.matrix = NULL, ng = 2, cM = TRUE, speed = 1, crit = 10^-5,
@@ -133,16 +133,16 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
     stop("Input data is missing, please cheak and fix", call. = FALSE)
   }
 
-  genotest <- table(geno)
+  genotest <- table(c(geno))
   datatry <- try(geno*geno, silent=TRUE)
-  if(class(datatry)[1] == "try-error" | FALSE%in%(names(genotest)%in%c(0, 1, 2))  | !is.matrix(geno)){
+  if(class(datatry)[1] == "try-error" | FALSE %in% (names(genotest) %in% c(0, 1, 2))  | length(dim(geno)) != 2){
     stop("Genotype data error, please cheak your genotype data.", call. = FALSE)
   }
 
   marker <- as.matrix(marker)
-  markertest <- c(ncol(marker) != 2, NA%in%marker, marker[,1] != sort(marker[,1]), nrow(marker) != ncol(geno))
+  markertest <- c(ncol(marker) != 2, NA %in% marker, marker[,1] != sort(marker[,1]), nrow(marker) != ncol(geno))
   datatry <- try(marker*marker, silent=TRUE)
-  if(class(datatry)[1] == "try-error" | TRUE%in%markertest){
+  if(class(datatry)[1] == "try-error" | TRUE %in% markertest){
     stop("Marker data error, or the number of marker does not match the genetype data.", call. = FALSE)
   }
 
@@ -157,6 +157,7 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
     }
   }
 
+  y <- c(y)
   datatry <- try(y%*%geno, silent=TRUE)
   if(class(datatry)[1] == "try-error"){
     stop("Phenotype data error, or the number of individual does not match the genetype data.", call. = FALSE)
@@ -232,7 +233,7 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
   if(!detect[1] %in% c(0,1) | length(detect > 1)){detect <- TRUE}
 
   if(!is.numeric(QTLdist) | length(QTLdist) > 1 | min(QTLdist) < speed*2){
-    stop("Parameter QTLdist error, please input a bigger positive number.", call. = FALSE)
+    stop("Parameter QTLdist error, please input a more suitable positive number.", call. = FALSE)
   }
 
   if(!plot.all[1] %in% c(0,1) | length(plot.all) > 1){plot.all <- TRUE}
@@ -466,8 +467,8 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
   cr0 <- unique(marker[, 1])
   for(i in cr0){
     cr <- marker[marker[, 1] == i,]
-    minpos <- min(cr[, 2])+speed
-    if(speed%%1 == 0){minpos = ceiling(floor(min(cr[, 2]))+speed)}
+    minpos <- min(cr[, 2])
+    if(speed%%1 == 0){minpos = ceiling(min(cr[, 2]))}
     for(j in seq(minpos, (max(cr[, 2])), speed)){
       QTL <- matrix(c(i, j), 1, 2)
 
@@ -555,10 +556,13 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
 
     lcr <- c(0, cumsum(ncr))
     x0 <- c()
+    s0 <- c()
     cut0 <- (max(lcr)*speed/length(lcr)/5)*(cr0-1)
     xn <- 0
     for(i in 1:length(ncr)){
-      x0 <- c(x0, seq(speed, ncr[i]*speed, speed)+lcr[i]*speed+cut0[i])
+      x1 <- seq(speed, ncr[i]*speed, speed)+lcr[i]*speed+cut0[i]
+      x0 <- c(x0, x1)
+      s0 <- c(s0, seq(min(x1), max(x1), 1))
       xn <- c(xn, length(x0))
     }
     xn1 <- (lcr[-1]-ncr/2)*speed+cut0
@@ -573,7 +577,11 @@ IM.search2 <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR =
     graphics::axis(2, seq(0, yli*1.2, 5))
     graphics::axis(1, cr0, at = xn1, cex = 1.2, tick = FALSE)
     lse <- 4000/max(x0)
-    graphics::segments(x0, rep(-yli/10, length(x0)), x0, rep(-yli/5, length(x0)), lwd = lse)
+    if(speed < 1){
+      s0 <- x0
+    }
+    graphics::segments(s0, rep(-yli/10, length(s0)), s0, rep(-yli/5, length(s0)), lwd = lse)
+
 
     graphics::par(mar = c(2, 5, 4, 2))
     graphics::par(fig = c(0, 1, 0, 0.5), new = TRUE)

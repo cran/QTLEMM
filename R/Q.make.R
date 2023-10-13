@@ -67,12 +67,13 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
     stop("Input data is missing, please cheak and fix.", call. = FALSE)
   }
 
+  marker <- as.matrix(marker)
   markertest <- c(ncol(marker) != 2, NA %in% marker, marker[,1] != sort(marker[,1]))
 
   if(!is.null(geno)){
-    genotest <- table(geno)
+    genotest <- table(c(geno))
     datatry <- try(geno*geno, silent=TRUE)
-    if(class(datatry)[1] == "try-error" | FALSE %in% (names(genotest) %in% c(0, 1, 2))  | !is.matrix(geno)){
+    if(class(datatry)[1] == "try-error" | FALSE %in% (names(genotest) %in% c(0, 1, 2))  | length(dim(geno)) != 2){
       stop("Genotype data error, please cheak your genotype data.", call. = FALSE)
     }
     markertest <- c(markertest, nrow(marker) != ncol(geno))
@@ -109,6 +110,21 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
   if(!is.numeric(ng) | length(ng) > 1 | min(ng) < 1){
     stop("Parameter ng error, please input a positive integer.", call. = FALSE)
   }
+
+  if(interval){
+    qcr <- names(table(QTL[,1]))
+    for(i in qcr){
+      cr0 <- marker[marker[,1] == i,]
+      q0 <- QTL[QTL[,1] == i,]
+      if(!is.matrix(q0)){
+        q0 <- t(as.matrix(q0))
+      }
+      if(TRUE %in% (q0[,2] %in% range(cr0[,2]))){
+        stop("If parameter interval is set to TRUE, the set QTL cannot be the first or last marker in a chromosome.", call. = FALSE)
+      }
+    }
+  }
+
   ng <- round(ng)
 
   cr <- QTL[, 1]
@@ -357,15 +373,25 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
 
   cr0 <- marker[marker[, 1]==cr[1], ]
 
-  marker1 <- cr0[max(which(cr0[, 2] < QTL[1])), ]
-  marker2 <- cr0[max(which(cr0[, 2] < QTL[1]))+1, ]
-  if(interval == T){
-    marker2 <- cr0[min(which(cr0[, 2]>QTL[1])), ]
-  }
-  marker0 <- as.numeric(c(marker1[3], marker2[3]))
+  if(QTL[1] == cr0[1, 2]){
+    marker1 <- cr0[1, ]
+    marker2 <- cr0[2, ]
+    marker0 <- as.numeric(c(marker1[3], marker2[3]))
 
-  d1 <- as.numeric(QTL[1]-marker1[2])
-  d2 <- as.numeric(marker2[2]-QTL[1])
+    d1 <- as.numeric(QTL[1]-marker1[2])
+    d2 <- as.numeric(marker2[2]-QTL[1])
+  } else {
+    marker1 <- cr0[max(which(cr0[, 2] < QTL[1])), ]
+    marker2 <- cr0[max(which(cr0[, 2] < QTL[1]))+1, ]
+    if(interval){
+      marker2 <- cr0[min(which(cr0[, 2] > QTL[1])), ]
+    }
+    marker0 <- as.numeric(c(marker1[3], marker2[3]))
+
+    d1 <- as.numeric(QTL[1]-marker1[2])
+    d2 <- as.numeric(marker2[2]-QTL[1])
+  }
+
   Q1 <- type.fun(d1, d2, ng)
 
   Q1 <- list(Q1)
@@ -376,15 +402,24 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
     for(m in 2:n){
       cr0 <- marker[marker[, 1] == cr[m], ]
 
-      marker1 <- cr0[max(which(cr0[, 2] < QTL[m])), ]
-      marker2 <- cr0[max(which(cr0[, 2] < QTL[m]))+1, ]
-      if(interval == T){
-        marker2 <- cr0[min(which(cr0[, 2] > QTL[m])), ]
-      }
-      marker0 <- as.numeric(c(marker0, marker1[3], marker2[3]))
+      if(QTL[m] == cr0[1, 2]){
+        marker1 <- cr0[1, ]
+        marker2 <- cr0[2, ]
 
-      d1 <- as.numeric(QTL[m]-marker1[2])
-      d2 <- as.numeric(marker2[2]-QTL[m])
+        d1 <- as.numeric(QTL[m]-marker1[2])
+        d2 <- as.numeric(marker2[2]-QTL[m])
+      } else {
+        marker1 <- cr0[max(which(cr0[, 2] < QTL[m])), ]
+        marker2 <- cr0[max(which(cr0[, 2] < QTL[m]))+1, ]
+        if(interval){
+          marker2 <- cr0[min(which(cr0[, 2] > QTL[m])), ]
+        }
+        marker0 <- as.numeric(c(marker0, marker1[3], marker2[3]))
+
+        d1 <- as.numeric(QTL[m]-marker1[2])
+        d2 <- as.numeric(marker2[2]-QTL[m])
+      }
+
       Q2 <- type.fun(d1, d2, ng)
       Q1[[m]] <- Q2
     }
@@ -392,7 +427,10 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
 
 
   if(!is.null(geno)){
-    red.genotype <- geno[, marker0]
+    red.genotype <- geno[, marker0[c(1, 2)]]
+    for(k in 2:(length(marker0)/2)){
+      red.genotype <- cbind(red.genotype, geno[, marker0[c(2*k-1, 2*k)]])
+    }
     cp.matrix <- matrix(0, nrow(geno), nd^n)
     D2 <- matrix(0, nd^n, n)
     for(i in 1:n){
@@ -403,7 +441,7 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
       geno.j <- red.genotype[j, ]
       pq <- c()
       for(k in 1:length(QTL)){
-        g0 <- geno.j[(k*2-1):(k*2)]
+        g0 <- c(geno.j)[(k*2-1):(k*2)]
         if(is.na(g0[1]) & is.na(g0[2])){
           a <- Q1[[k]]
           a <- matrix(unlist(a), nrow(a), ncol(a))
@@ -438,6 +476,7 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
         } else {cp.matrix[j,i] <- as.numeric(pq1)}
       }
     }
+
     colnames(cp.matrix) <- qname
     Q1[[m+1]] <- cp.matrix
   }

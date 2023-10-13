@@ -109,7 +109,7 @@
 #'
 #' # run and result
 #' result <- MIM.points2(QTL, marker, geno.s, ys, yu, sele.g = "p",
-#'  type = "RI", ng = 2, scope = c(0,3,0), speed = 2)
+#'  type = "RI", ng = 2, scope = c(0,1,2), speed = 2)
 #' result$QTL.best
 #' result$effect.best
 MIM.points2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR = NULL, method = "EM",
@@ -120,9 +120,9 @@ MIM.points2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
     stop("Input data is missing, please cheak and fix.", call. = FALSE)
   }
 
-  genotest <- table(geno)
+  genotest <- table(c(geno))
   datatry <- try(geno*geno, silent=TRUE)
-  if(class(datatry)[1] == "try-error" | FALSE %in% (names(genotest) %in% c(0, 1, 2))  | !is.matrix(geno)){
+  if(class(datatry)[1] == "try-error" | FALSE %in% (names(genotest) %in% c(0, 1, 2))  | length(dim(geno)) != 2){
     stop("Genotype data error, please cheak your genotype data.", call. = FALSE)
   }
 
@@ -151,7 +151,7 @@ MIM.points2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
   }
 
   y[is.na(y)] <- mean(y,na.rm = TRUE)
-
+  y <- c(y)
   datatry <- try(y%*%geno, silent=TRUE)
   if(class(datatry)[1] == "try-error"){
     stop("Phenotype data error, or the number of individual does not match the genetype data.", call. = FALSE)

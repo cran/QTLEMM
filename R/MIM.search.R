@@ -91,9 +91,9 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
     stop("Input data is missing, please cheak and fix.", call. = FALSE)
   }
 
-  genotest <- table(geno)
+  genotest <- table(c(geno))
   datatry <- try(geno*geno, silent=TRUE)
-  if(class(datatry)[1] == "try-error" | FALSE %in% (names(genotest) %in% c(0, 1, 2))  | !is.matrix(geno)){
+  if(class(datatry)[1] == "try-error" | FALSE %in% (names(genotest) %in% c(0, 1, 2))  | length(dim(geno)) != 2){
     stop("Genotype data error, please cheak your genotype data.", call. = FALSE)
   }
 
@@ -123,7 +123,7 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
   }
 
   y[is.na(y)] <- mean(y,na.rm = TRUE)
-
+  y <- c(y)
   datatry <- try(y%*%geno, silent=TRUE)
   if(class(datatry)[1] == "try-error"){
     stop("Phenotype data error, or the number of individual does not match the genetype data.", call. = FALSE)
@@ -240,8 +240,8 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
   }
   for(i in cr0){
     cr <- marker[marker[, 1] == i,]
-    minpos <- min(cr[, 2])+speed
-    if(speed%%1 == 0){minpos = ceiling(floor(min(cr[, 2]))+speed)}
+    minpos <- min(cr[, 2])
+    if(speed%%1 == 0){minpos = ceiling(min(cr[, 2]))}
     QTLs0 <- seq(minpos, (max(cr[,2])), speed)
     QTLc0 <- QTL[QTL[, 1] == i,]
     if(ncol(as.matrix(QTLc0))==1){

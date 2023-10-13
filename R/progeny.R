@@ -67,6 +67,7 @@ progeny <- function(QTL, marker, type = "RI", ng = 2, cM = TRUE, E.vector = NULL
     stop("Input data is missing, please cheak and fix.", call. = FALSE)
   }
 
+  marker <- as.matrix(marker)
   markertest <- c(ncol(marker) != 2, NA %in% marker, marker[,1] != sort(marker[,1]))
 
   datatry <- try(marker*marker, silent=TRUE)

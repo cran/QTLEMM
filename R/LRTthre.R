@@ -59,6 +59,7 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
     stop("Input data is missing, please cheak and fix.", call. = FALSE)
   }
 
+  marker <- as.matrix(marker)
   markertest <- c(ncol(marker) != 2, NA %in% marker, marker[,1] != sort(marker[,1]))
   datatry <- try(marker*marker, silent=TRUE)
   if(class(datatry)[1] == "try-error" | TRUE %in% markertest){

@@ -146,9 +146,9 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
     stop("Input data is missing, please cheak and fix", call. = FALSE)
   }
 
-  genotest <- table(geno)
+  genotest <- table(c(geno))
   datatry <- try(geno*geno, silent=TRUE)
-  if(class(datatry)[1] == "try-error" | FALSE %in% (names(genotest) %in% c(0, 1, 2))  | !is.matrix(geno)){
+  if(class(datatry)[1] == "try-error" | FALSE %in% (names(genotest) %in% c(0, 1, 2))  | length(dim(geno)) != 2){
     stop("Genotype data error, please cheak your genotype data.", call. = FALSE)
   }
 
@@ -182,7 +182,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       stop("Input data error, please check your input data.", call. = FALSE)
     }
   } else {
-    datatry <- try(y%*%y, silent=TRUE)
+    datatry <- try(y%*%t(y), silent=TRUE)
     datatry1 <- try(D.matrix*D.matrix, silent=TRUE)
     if(class(datatry)[1] == "try-error" | class(datatry1)[1] == "try-error" | NA %in% D.matrix | length(y) < 2){
       stop("Input data error, please check your input data.", call. = FALSE)
@@ -258,7 +258,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       n.para <- ncol(D.matrix)
       Qn <- nrow(D.matrix)
 
-      L0 <- sum(log(stats::dnorm(y,mean = mean(y), sd = stats::var(y)^0.5)))
+      L0 <- sum(log(stats::dnorm(y,mean = mean(y), sd = stats::var(c(y))^0.5)))
       if(is.null(X)){
         X <- matrix(1, N, 1)
       } else if (is.vector(X)){

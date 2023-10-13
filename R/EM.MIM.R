@@ -86,12 +86,17 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
     stop("Input data is missing, please cheak and fix", call. = FALSE)
   }
 
-  datatry <- try(y%*%cp.matrix%*%D.matrix, silent=TRUE)
-  if(class(datatry)[1] == "try-error" | NA %in% D.matrix | NA %in% cp.matrix){
+  datatry <- try(t(y)%*%cp.matrix%*%D.matrix, silent=TRUE)
+  if(class(datatry)[1] == "try-error" | NA %in% D.matrix | NA %in% c(cp.matrix)){
     stop("Input data error, please check your input data.", call. = FALSE)
   }
 
-  Y <- y
+  datatry <- try(y%*%t(y), silent=TRUE)
+  if(class(datatry)[1] == "try-error" | length(y) < 2){
+    stop("Input data error, please check your input data.", call. = FALSE)
+  }
+
+  Y <- c(y)
   ind <- length(Y)
   g <- nrow(D.matrix)
   eff <- ncol(D.matrix)
@@ -113,7 +118,7 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
   } else if (is.numeric(beta)){
     beta <- matrix(rep(beta, ncol(X)), ncol(X), 1)
   }
-  if(is.null(variance)){variance <- stats::var(Y)}
+  if(is.null(variance)){variance <- stats::var(c(Y))}
   if(!console[1] %in% c(0,1) | length(console) > 1){console <- TRUE}
   if(!conv[1] %in% c(0,1) | length(conv) > 1){conv <- TRUE}
 
@@ -146,98 +151,95 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
   if(console){
     cat("number", "var", effectname, "\n", sep = "\t")
   }
+
+  Yt <- as.matrix(Y)
+  indvec <- matrix(1, 1, ind)
+  gvec <- matrix(1, 1, g)
+
   while (max(abs(Delta)) > crit & number < stop) {
-    muji.matrix <- t(D.matrix%*%E.vector%*%matrix(1, 1, ind))+X%*%beta%*%matrix(1, 1, g)
 
-    PI.matrix <- matrix(0, ind, g)
+    Et <- as.matrix(E.vector)
+    bt<- as.matrix(beta)
+
+    muji.matrix <- t(D.matrix%*%E.vector%*%indvec)+X%*%beta%*%gvec
+
+    P0.matrix <- cp.matrix*stats::dnorm(y, muji.matrix, c(sigma))
+    PIt <- cp.matrix
+
     for(j in 1:ind){
-      P0 <- c()
-      for(i in 1:g){
-        P0[i] <- cp.matrix[j, i]*stats::dnorm(Y[j], muji.matrix[j, i], sigma)
-      }
-      if(sum(P0) != 0){P0 <- P0/sum(P0)
-      } else {P0 <- rep(1/g, g)}
-      PI.matrix[j, ] <- P0
+      P0 <- P0.matrix[j,]
+      PIt[j,] <- P0/sum(P0)
     }
 
-    r.vector=c()
-    for(i in 1:eff){
-      r01 <- t(Y-X%*%beta)%*%PI.matrix%*%D.matrix[, i]
-      r02 <- matrix(1, 1, ind)%*%PI.matrix%*%(D.matrix[, i]*D.matrix[, i])
-      r.vector[i] <- r01/r02
-    }
+    PD <- t(Yt-X%*%bt)%*%PIt%*%D.matrix
+    PDD <- indvec%*%PIt%*%(D.matrix^2)
+    r.vector <- c(PD/PDD)
 
     M.matrix <- matrix(0, eff, eff)
-    for(i in 1:eff){
-      for(j in 1:eff){
-        if(i != j){
-          M01 <- matrix(1, 1, ind)%*%PI.matrix%*%(D.matrix[, i]*D.matrix[, j])
-          M02 <- matrix(1, 1, ind)%*%PI.matrix%*%(D.matrix[, i]*D.matrix[, i])
-          M.matrix[i, j]=M01/M02
-        }
-      }
-    }
-
-    E.t <- r.vector-M.matrix%*%E.vector
-
-    beta.t <- solve(t(X)%*%X)%*%t(X)%*%(Y-PI.matrix%*%D.matrix%*%E.t)
-
     V.matrix <- matrix(0, eff, eff)
     for(i in 1:eff){
+      Di <- D.matrix[, i]
+      Dij <- D.matrix
       for(j in 1:eff){
-        V.matrix[i, j] <- matrix(1, 1, ind)%*%PI.matrix%*%(D.matrix[, i]*D.matrix[, j])
+        Dij[, j] <- Di*D.matrix[, j]
       }
+      iPI <- indvec%*%PIt
+      M01 <- c(iPI)%*%Dij
+      V.matrix[i, ] <- c(M01)
+      M.matrix[, i] <- c(M01)/c(PDD)
     }
+    diag(M.matrix) <- 0
 
-    sigma.t <- sqrt((t(Y-X%*%beta.t)%*%(Y-X%*%beta.t)-t(Y-X%*%beta.t)%*%PI.matrix%*%D.matrix%*%E.t*2+t(E.t)%*%V.matrix%*%E.t)/ind)
+    E.t <- r.vector-M.matrix%*%E.vector
+    beta.t <- solve(t(X)%*%X)%*%t(X)%*%(c(Yt)-PIt%*%D.matrix%*%E.t)
 
-    Delta <- E.t-E.vector
+    YXb <- Y-X%*%c(beta.t)
+    EVE <- t(E.t)%*%V.matrix%*%E.t
+    sigma.t <- sqrt((t(YXb)%*%(YXb)-t(YXb)%*%PIt%*%D.matrix%*%E.t*2+EVE)/ind)
+
+    Delta <- c(E.t-E.vector)
     if(NaN %in% Delta){
       break()
     }
     number <- number+1
     if(console){
-      Ep <- round(E.t, 3)
-      sp <- round(sigma.t^2, 3)
+      Ep <- round(c(E.t), 3)
+      sp <- round(c(sigma.t)^2, 3)
       cat(number, sp, Ep, "\n", sep = "\t")
     }
 
-    E.vector <- E.t
-    beta <- beta.t
-    sigma <- sigma.t
+    E.vector <- c(E.t)
+    beta <- c(beta.t)
+    sigma <- c(sigma.t)
+
   }
 
-  PI.matrix <- matrix(0, ind, g)
+  P0.matrix <- cp.matrix*stats::dnorm(y, muji.matrix, c(sigma))
+  PI.matrix <- cp.matrix
+
   for(j in 1:ind){
-    P0 <- c()
-    for(i in 1:g){
-      P0[i] <- cp.matrix[j, i]*stats::dnorm(Y[j], muji.matrix[j, i], sigma)
-    }
-    P0 <- P0/sum(P0)
-    PI.matrix[j, ] <- P0
+    P0 <- P0.matrix[j,]
+    P0[P0 == 0] <- 1/g
+    PI.matrix[j,] <- P0/sum(P0)
   }
-  E.vector <- c(E.vector)
+
   names(E.vector) <- effectname
   colnames(PI.matrix) <- colnames(cp.matrix)
 
   variance <- sigma^2
 
-  L0 <- c()
-  L1 <- c()
-  for(k in 1:nrow(cp.matrix)){
-    L00 <- c()
-    L01 <- c()
-    for(m in 1:nrow(D.matrix)){
-      L00[m] <- cp.matrix[k, m]*stats::dnorm(Y[k], mean(X%*%beta), sigma)
-      L01[m] <- cp.matrix[k, m]*stats::dnorm(Y[k], mean(X%*%beta)+D.matrix[m, ]%*%E.vector, sigma)
-    }
-    L0[k] <- sum(L00)
-    L1[k] <- sum(L01)
+  L0 <- rep(0, ind)
+  L1 <- rep(0, ind)
+  Xb <- X%*%beta
+  for(m in 1:g){
+    L0 <- L0+(cp.matrix[, m]*stats::dnorm(Y, mean(Xb), sigma))
+    L1 <- L1+(cp.matrix[, m]*stats::dnorm(Y, mean(Xb)+D.matrix[m,]%*%E.vector, sigma))
   }
   like0 <- sum(log(L0))
   like1 <- sum(log(L1))
   LRT <- 2*(like1-like0)
-  y.hat <- PI.matrix%*%D.matrix%*%E.vector+X%*%beta
+
+  y.hat <- PI.matrix%*%D.matrix%*%E.vector+Xb
   r2 <- stats::var(y.hat)/stats::var(y)
 
   if(number == stop){
@@ -250,10 +252,13 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
       LRT <- 0
       r2 <- 0
     }
-    warning("EM algorithm fails to converge, please check the input data or adjust the convergence criterion and stopping criterion.")
+    warning("EM algorithm fails to converge, please check the input data or adjust
+            the convergence criterion and stopping criterion.")
   }
 
   result <- list(E.vector = E.vector, beta = as.numeric(beta), variance = as.numeric(variance),
-                 PI.matrix = PI.matrix, log.likelihood = like1, LRT = LRT, R2 = r2, y.hat = y.hat, iteration.number = number)
+                 PI.matrix = PI.matrix, log.likelihood = like1, LRT = LRT, R2 = r2,
+                 y.hat = y.hat, iteration.number = number)
+
   return(result)
 }
