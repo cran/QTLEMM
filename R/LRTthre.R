@@ -59,7 +59,6 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
     stop("Input data is missing, please cheak and fix.", call. = FALSE)
   }
 
-  marker <- as.matrix(marker)
   markertest <- c(ncol(marker) != 2, NA %in% marker, marker[,1] != sort(marker[,1]))
   datatry <- try(marker*marker, silent=TRUE)
   if(class(datatry)[1] == "try-error" | TRUE %in% markertest){
@@ -538,7 +537,7 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
                   r1*(1-r1)*f1^2, r1*(1-r1)*(1-f1)^2, r1*(1-r1)*f1^2, r1*(1-r1)*(1-f1)^2,rep(0, 18),
                   rep(r1*(1-r1)*r2*(1-r2)*r3*(1-r3), 8))/2
       tm[7,] <- c(0, 0, 0, 0, f2*(1-f2), f2*(1-f2), 1, rep(0, 9), r2*(1-r2)*r3^2, r2*(1-r2)*r3^2,
-                   r2*(1-r2)*(1-r3)^2, r2*(1-r2)*(1-r3)^2, r2*(1-r2), r2*(1-r2), rep(0, 20),
+                  r2*(1-r2)*(1-r3)^2, r2*(1-r2)*(1-r3)^2, r2*(1-r2), r2*(1-r2), rep(0, 20),
                   rep(r1*(1-r1)*f1*(1-f1), 4), r1*(1-r1), r1*(1-r1), rep(0, 12), rep(r1*(1-r1)*r2*(1-r2),4),
                   r1*(1-r1)*r2*(1-r2)*c(r3^2, r3^2,r3^2, (1-r3)^2, (1-r3)^2, r3^2, (1-r3)^2, (1-r3)^2))/2
       tm[8,] <- c(0, 0, 0, 1, f2^2, (1-f2)^2, 0, 4, 1, rep(0, 5), r2^2, (1-r2)^2, (r2*(1-r3))^2,

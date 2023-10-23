@@ -102,21 +102,21 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
     stop("Input data is missing, please cheak and fix", call. = FALSE)
   }
 
-  genotest <- table(c(geno))
+  genotest <- table(geno)
   datatry <- try(geno*geno, silent=TRUE)
-  if(class(datatry)[1] == "try-error" | FALSE %in% (names(genotest)%in%c(0, 1, 2))  | length(dim(geno)) != 2){
+  if(class(datatry)[1] == "try-error" | FALSE%in%(names(genotest)%in%c(0, 1, 2))  | !is.matrix(geno)){
     stop("Genotype data error, please cheak your genotype data.", call. = FALSE)
   }
 
   marker <- as.matrix(marker)
-  markertest <- c(ncol(marker) != 2, NA %in% marker, marker[,1] != sort(marker[,1]), nrow(marker) != ncol(geno))
+  markertest <- c(ncol(marker) != 2, NA%in%marker, marker[,1] != sort(marker[,1]), nrow(marker) != ncol(geno))
   datatry <- try(marker*marker, silent=TRUE)
-  if(class(datatry)[1] == "try-error" | TRUE %in% markertest){
+  if(class(datatry)[1] == "try-error" | TRUE%in%markertest){
     stop("Marker data error, or the number of marker does not match the genetype data.", call. = FALSE)
   }
 
   y[is.na(y)] <- mean(y,na.rm = TRUE)
-  y <- c(y)
+
   datatry <- try(y%*%geno, silent=TRUE)
   if(class(datatry)[1] == "try-error"){
     stop("Phenotype data error, or the number of individual does not match the genetype data.", call. = FALSE)
@@ -174,7 +174,7 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   if(!detect[1] %in% c(0,1) | length(detect > 1)){detect <- TRUE}
 
   if(!is.numeric(QTLdist) | length(QTLdist) > 1 | min(QTLdist) < speed*2){
-    stop("Parameter QTLdist error, please input a more suitable positive number.", call. = FALSE)
+    stop("Parameter QTLdist error, please input a bigger positive number.", call. = FALSE)
   }
 
   if(!plot.all[1] %in% c(0,1) | length(plot.all) > 1){plot.all <- TRUE}
@@ -232,8 +232,8 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   cr0 <- unique(marker[, 1])
   for(i in cr0){
     cr <- marker[marker[, 1] == i,]
-    minpos <- min(cr[, 2])
-    if(speed%%1 == 0){minpos = ceiling(min(cr[, 2]))}
+    minpos <- min(cr[, 2])+speed
+    if(speed%%1 == 0){minpos = ceiling(floor(min(cr[, 2]))+speed)}
     for(j in seq(minpos, (max(cr[,2])), speed)){
       Q.matrix <- Q.make(matrix(c(i, j), 1, 2), marker, geno, type = type, ng = ng)
       cp.matrix <- Q.matrix$cp.matrix
@@ -250,8 +250,8 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
         L00 <- c()
         L01 <- c()
         for(m in 1:nrow(D.matrix)){
-          L00[m] <- c(cp.matrix[k,m])*stats::dnorm((y[k]-mu0)/sigma)
-          L01[m] <- c(cp.matrix[k,m])*stats::dnorm((y[k]-(mu0+D.matrix[m,]%*%eff))/sigma)
+          L00[m] <- cp.matrix[k,m]*stats::dnorm((y[k]-mu0)/sigma)
+          L01[m] <- cp.matrix[k,m]*stats::dnorm((y[k]-(mu0+D.matrix[m,]%*%eff))/sigma)
         }
         L0[k] <- sum(L00)
         L1[k] <- sum(L01)
@@ -334,13 +334,10 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
 
     lcr <- c(0, cumsum(ncr))
     x0 <- c()
-    s0 <- c()
     cut0 <- (max(lcr)*speed/length(lcr)/5)*(cr0-1)
     xn <- 0
     for(i in 1:length(ncr)){
-      x1 <- seq(speed, ncr[i]*speed, speed)+lcr[i]*speed+cut0[i]
-      x0 <- c(x0, x1)
-      s0 <- c(s0, seq(min(x1), max(x1), 1))
+      x0 <- c(x0, seq(speed, ncr[i]*speed, speed)+lcr[i]*speed+cut0[i])
       xn <- c(xn, length(x0))
     }
     xn1 <- (lcr[-1]-ncr/2)*speed+cut0
@@ -349,16 +346,13 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
          ylim = c(-yli/10, yli), xaxt = "n", bty = "l",axes = FALSE)
     for(k in 1:(length(xn)-1)){
       graphics::points(x0[(xn[k]+1):xn[k+1]], effect$LRT[(xn[k]+1):xn[k+1]], main = "", ylab = "LRT statistic",
-             xlab = "", type = "l", ylim = c(-yli/10, yli), xaxt = "n", bty = "l")
+                       xlab = "", type = "l", ylim = c(-yli/10, yli), xaxt = "n", bty = "l")
     }
     if(!is.null(LRT.threshold)){graphics::abline(h = LRT.threshold, col = "red", lwd = 2)}
     graphics::axis(2, seq(0, yli*1.2, 5))
     graphics::axis(1, cr0, at = xn1, cex = 1.2, tick = FALSE)
     lse <- 4000/max(x0)
-    if(speed < 1){
-      s0 <- x0
-    }
-    graphics::segments(s0, rep(-yli/10, length(s0)), s0, rep(-yli/5, length(s0)), lwd = lse)
+    graphics::segments(x0, rep(-yli/10, length(x0)), x0, rep(-yli/5, length(x0)), lwd = lse)
 
     graphics::par(mar = c(2, 5, 4, 2))
     graphics::par(fig = c(0, 1, 0, 0.5), new = TRUE)
@@ -367,8 +361,8 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
     graphics::abline(h = 0, col = "blue", lwd = 2)
     for(k in 1:(length(xn)-1)){
       graphics::points(x0[(xn[k]+1):xn[k+1]], effect$a1[(xn[k]+1):xn[k+1]], main = "", ylab = "effect",
-             xlab = "", type = "l", ylim = c(min(c(effect$a1, 0), na.rm = TRUE)*1.2, max(c(effect$a1, 0), na.rm = TRUE)*1.2),
-             xaxt = "n", bty = "n")
+                       xlab = "", type = "l", ylim = c(min(c(effect$a1, 0), na.rm = TRUE)*1.2, max(c(effect$a1, 0), na.rm = TRUE)*1.2),
+                       xaxt = "n", bty = "n")
     }
   }
 

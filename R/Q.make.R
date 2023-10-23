@@ -425,27 +425,25 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
     }
   }
 
-
   if(!is.null(geno)){
-    red.genotype <- geno[, marker0[c(1, 2)]]
-    for(k in 2:(length(marker0)/2)){
-      red.genotype <- cbind(red.genotype, geno[, marker0[c(2*k-1, 2*k)]])
-    }
-    cp.matrix <- matrix(0, nrow(geno), nd^n)
-    D2 <- matrix(0, nd^n, n)
-    for(i in 1:n){
-      D2[, i] <- rep(rep(2:(3-nd), each = nd^(n-i)), nd^(i-1))
-    }
+    ngt <- nd^n
+    ind <- nrow(geno)
+    red.genotype <- geno[, marker0]
+
+    cp.matrix <- matrix(0, ind, ngt)
+    D2 <- gtools::permutations(nd, n, 2:(3-nd), FALSE, TRUE)
     qname <- apply(D2, 1, paste, collapse = "")
-    for(j in 1:nrow(geno)){
+    D3 <- -D2+3
+
+    for(j in 1:ind){
       geno.j <- red.genotype[j, ]
       pq <- c()
-      for(k in 1:length(QTL)){
+      for(k in 1:n){
         g0 <- c(geno.j)[(k*2-1):(k*2)]
-        if(is.na(g0[1]) & is.na(g0[2])){
-          a <- Q1[[k]]
-          a <- matrix(unlist(a), nrow(a), ncol(a))
-          pq0 <- apply(a, 2, mean)
+        if(!is.na(g0[1]) & !is.na(g0[2])){
+          g0 <- paste(g0[1], g0[2], sep = "")
+          pq0 <- Q1[[k]]
+          pq0 <- pq0[row.names(pq0) == g0]
         } else if (!is.na(g0[1]) & is.na(g0[2])){
           a <- row.names(Q1[[k]])
           a <- as.numeric(unlist(strsplit(a,split = "", fixed = TRUE)) )
@@ -461,22 +459,18 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
           a <- matrix(unlist(a), nrow(a), ncol(a))
           pq0 <- apply(a, 2, mean)
         } else {
-          g0 <- paste(g0[1], g0[2], sep = "")
-          pq0 <- Q1[[k]]
-          pq0 <- pq0[row.names(pq0) == g0]
+          a <- Q1[[k]]
+          a <- matrix(unlist(a), nrow(a), ncol(a))
+          pq0 <- apply(a, 2, mean)
         }
         pq <- rbind(pq, pq0)
       }
 
-      for(i in 1:nd^n){
-        a <- qname[i]
-        a <- -as.numeric(unlist(strsplit(a,split = "", fixed = TRUE)))+3
-        pq1 <- pq[1:length(QTL), a]
-        if(is.matrix(pq1)){cp.matrix[j, i] <- prod(as.numeric(diag(pq1)))
-        } else {cp.matrix[j,i] <- as.numeric(pq1)}
+      for(i in 1:ngt){
+        pq1 <- (D3[i, ]-1)*n+(1:n)
+        cp.matrix[j, i] <- prod(pq[pq1])
       }
     }
-
     colnames(cp.matrix) <- qname
     Q1[[m+1]] <- cp.matrix
   }

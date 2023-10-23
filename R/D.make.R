@@ -179,7 +179,7 @@ D.make <- function(nQTL, type = "RI", a = TRUE, d = TRUE, aa = FALSE, dd = FALSE
         }
         for(j in 1:ncol(dd)){
           D1 <- matrix(D.matrix[, colnames(D.matrix) == paste("d", dd[1, j], sep = "")]*
-                      D.matrix[, colnames(D.matrix) == paste("d", dd[2, j], sep = "")], nrow(D.matrix), 1)
+                         D.matrix[, colnames(D.matrix) == paste("d", dd[2, j], sep = "")], nrow(D.matrix), 1)
           colnames(D1) <- paste("d", dd[1, j], ":", "d", dd[2, j], sep = "")
           D.matrix <- cbind(D.matrix, D1)
         }
@@ -205,7 +205,7 @@ D.make <- function(nQTL, type = "RI", a = TRUE, d = TRUE, aa = FALSE, dd = FALSE
         }
         for(j in 1:ncol(ad)){
           D1 <- matrix(D.matrix[, colnames(D.matrix) == paste("a", ad[1, j], sep = "")]*
-                      D.matrix[, colnames(D.matrix) == paste("d", ad[2, j], sep = "")], nrow(D.matrix), 1)
+                         D.matrix[, colnames(D.matrix) == paste("d", ad[2, j], sep = "")], nrow(D.matrix), 1)
           colnames(D1) <- paste("a", ad[1, j], ":", "d", ad[2, j], sep = "")
           D.matrix <- cbind(D.matrix, D1)
         }
