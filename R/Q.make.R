@@ -149,7 +149,7 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
     nd <- 2
     type.fun <- function(d1, d2, ng){
       bcp2M <- function(d, nG){
-        r <- (1-exp(-2*d/100))/2
+        r <- (1-exp(-2*d))/2
         pAB <- pAb <- paB <- pab <- c()
 
         pAB[1] <- (1-r)/2
@@ -169,8 +169,8 @@ Q.make <- function(QTL, marker, geno = NULL, interval = FALSE, type = "RI", ng =
       }
 
       bcp3M <- function(d1, d2, nG){
-        r1 <- (1-exp(-2*d1/100))/2
-        r2 <- (1-exp(-2*d2/100))/2
+        r1 <- (1-exp(-2*d1))/2
+        r2 <- (1-exp(-2*d2))/2
         pABC <- pABc <- pAbC <- paBC <- pabC <- paBc <- pAbc <- pabc <- c()
 
         pABC[1] <- (1-r1)*(1-r2)/2

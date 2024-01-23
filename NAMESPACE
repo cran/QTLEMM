@@ -3,6 +3,7 @@
 export(D.make)
 export(EM.MIM)
 export(EM.MIM2)
+export(EM.MIMv)
 export(EQF.permu)
 export(EQF.plot)
 export(IM.search)

@@ -440,6 +440,11 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
     stop("Parameter crit error, please input a positive number between 0 and 1.", call. = FALSE)
   }
 
+  if(!is.numeric(stop) | length(stop) > 1 | min(crit) <= 0){
+    stop = 1000
+    warning("Parameter stop error, adjust to 1000.")
+  }
+
   nQTL <- nrow(QTL)
 
   mixprop <- function(QTL, nu, marker, geno, model, cM = TRUE, type = "RI", ng = 2, cp.matrix = NULL){

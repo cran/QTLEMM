@@ -69,6 +69,7 @@
 #' \code{\link[QTLEMM]{D.make}}
 #' \code{\link[QTLEMM]{Q.make}}
 #' \code{\link[QTLEMM]{EM.MIM2}}
+#' \code{\link[QTLEMM]{EM.MIMv}}
 #'
 #' @examples
 #' # load the example data
@@ -141,6 +142,11 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
     stop("Parameter crit error, please input a positive number between 0 and 1.", call. = FALSE)
   }
 
+  if(!is.numeric(stop) | length(stop) > 1 | min(crit) <= 0){
+    stop = 1000
+    warning("Parameter stop error, adjust to 1000.")
+  }
+
   Delta <- 1
   number <- 0
 
@@ -164,12 +170,9 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
     muji.matrix <- t(D.matrix%*%E.vector%*%indvec)+X%*%beta%*%gvec
 
     P0.matrix <- cp.matrix*stats::dnorm(y, muji.matrix, c(sigma))
-    PIt <- cp.matrix
-
-    for(j in 1:ind){
-      P0 <- P0.matrix[j,]
-      PIt[j,] <- P0/sum(P0)
-    }
+    P0s <- apply(P0.matrix, 1, sum)
+    P0.matrix[P0s == 0, ] <- rep(1, g)
+    PIt <- P0.matrix*(1/P0s%*%gvec)
 
     PD <- t(Yt-X%*%bt)%*%PIt%*%D.matrix
     PDD <- indvec%*%PIt%*%(D.matrix^2)
@@ -214,14 +217,11 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
 
   }
 
+  muji.matrix <- t(D.matrix%*%E.vector%*%indvec)+X%*%beta%*%gvec
   P0.matrix <- cp.matrix*stats::dnorm(y, muji.matrix, c(sigma))
-  PI.matrix <- cp.matrix
-
-  for(j in 1:ind){
-    P0 <- P0.matrix[j,]
-    P0[P0 == 0] <- 1/g
-    PI.matrix[j,] <- P0/sum(P0)
-  }
+  P0s <- apply(P0.matrix, 1, sum)
+  P0.matrix[P0s == 0, ] <- rep(1, g)
+  PI.matrix <- P0.matrix*(1/P0s%*%gvec)
 
   names(E.vector) <- effectname
   colnames(PI.matrix) <- colnames(cp.matrix)

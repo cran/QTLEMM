@@ -164,7 +164,7 @@ progeny <- function(QTL, marker, type = "RI", ng = 2, cM = TRUE, E.vector = NULL
     return(DNA.new)
   }
 
-  VG.RI <- function(QTL, E.vector){
+  VG.RI <- function(QTL, E.vector, ng){
     n <- as.numeric(nrow(QTL))
 
     r.matrix <- matrix(0, n, n)
@@ -179,7 +179,7 @@ progeny <- function(QTL, marker, type = "RI", ng = 2, cM = TRUE, E.vector = NULL
       }
     }
     r.matrix <- r.matrix+t(r.matrix)
-    lamda <- 1-2*r.matrix
+    lamda <- (1-2*r.matrix)*(1-r.matrix)^(ng-2)
     lamda.aadd <- c()
     for(i in 1:(n-1)){
       lamda.aadd <- c(lamda.aadd, lamda[i, (i+1):n])
@@ -252,7 +252,7 @@ progeny <- function(QTL, marker, type = "RI", ng = 2, cM = TRUE, E.vector = NULL
     return(VG)
   }
 
-  VG.BC <- function(QTL, E.vector){
+  VG.BC <- function(QTL, E.vector, ng){
     n <- nrow(QTL)
 
     r.matrix <- matrix(0, n, n)
@@ -260,14 +260,13 @@ progeny <- function(QTL, marker, type = "RI", ng = 2, cM = TRUE, E.vector = NULL
       for(j in 1:i){
         Qij <- QTL[c(i, j), ]
         if(Qij[1, 1] != Qij[2, 1]){
-          r.matrix[i, j] <- 0.5
+          r.matrix[i, j] <- r.matrix[j, i] <- 0.5
         } else {
-          r.matrix[i, j] <- (1-exp(-2*(abs(Qij[1, 2]-Qij[2, 2]))/100))/2
+          r.matrix[i, j] <- r.matrix[j, i] <- (1-exp(-2*(abs(Qij[1, 2]-Qij[2, 2]))/100))/2
         }
       }
     }
-    r.matrix <- r.matrix+t(r.matrix)
-    lamda <- 1-2*r.matrix
+    lamda <- (1-2*r.matrix)*(1-r.matrix)^(ng-1)
     lamda.aadd <- c()
     for(i in 1:(n-1)){
       lamda.aadd <- c(lamda.aadd, lamda[i, (i+1):n])
@@ -276,12 +275,12 @@ progeny <- function(QTL, marker, type = "RI", ng = 2, cM = TRUE, E.vector = NULL
     E.a <- E.vector[1:n]
     E.iaa <- E.vector[-(1:n)]
 
-    va <- sum(E.a^2/2)
-    viaa <- sum(E.iaa^2/4)
+    va <- sum(E.a^2/4)
+    viaa <- sum(E.iaa^2/16)
     vaa <- c()
     for(i in 1:(n-1)){
       for(j in (i+1):n){
-        vaa <- c(vaa, lamda.aadd[length(vaa)+1]*E.a[i]*E.a[j])
+        vaa <- c(vaa, lamda.aadd[length(vaa)+1]*E.a[i]*E.a[j]/2)
       }
     }
     vaa <- sum(vaa)
@@ -311,9 +310,9 @@ progeny <- function(QTL, marker, type = "RI", ng = 2, cM = TRUE, E.vector = NULL
       }
     }
     if(n == 1){
-      VG <- sum((E.vector[1:n])^2/2)
+      VG <- sum((E.vector[1:n])^2/4)
     } else {
-      VG <- VG.BC(QTL, E.vector)
+      VG <- VG.BC(QTL, E.vector, ng)
     }
   } else {
     for(i in 1:size){
@@ -354,7 +353,7 @@ progeny <- function(QTL, marker, type = "RI", ng = 2, cM = TRUE, E.vector = NULL
     if(n == 1){
       VG <- sum((E.vector[(1:n)*2-1])^2/2)+sum((E.vector[(1:n)*2])^2/4)
     } else {
-      VG <- VG.RI(QTL, E.vector)
+      VG <- VG.RI(QTL, E.vector, ng)
     }
   }
   prog <- matrix(0, size, length(dis))
