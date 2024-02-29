@@ -20,43 +20,43 @@ LRTthre(
 }
 \arguments{
 \item{marker}{matrix. A k*2 matrix contains the marker information,
-where the row dimension k is the number of markers in the chromosomes.
-The first column labels the chromosomes where the markers are located,
-and the second column labels the positions of QTLs (in morgan (M) or
-centimorgan (cM)). Note that chromosomes and positions must be divided
-in order.}
+where the row dimension 'k' represents the number of markers in the
+chromosomes. The first column labels the chromosomes where the markers
+are located, and the second column labels the positions of markers (in
+morgan (M) or centimorgan (cM)). It's important to note that chromosomes
+and positions must be sorted in order.}
 
-\item{type}{character. The population type of the dataset. Include
+\item{type}{character. The population type of the dataset. Includes
 backcross (type="BC"), advanced intercross population (type="AI"), and
-recombinant inbred population (type="RI").}
+recombinant inbred population (type="RI"). The default value is "RI".}
 
 \item{ng}{integer. The generation number of the population type. For
-example, the BC1 population is type="BC" with ng=1; the AI F3
-population is type="AI" with ng=3.}
+instance, in a BC1 population where type="BC", ng=1; in an AI F3
+population where type="AI", ng=3.}
 
-\item{cM}{logical. Specify the unit of marker position. cM=TRUE for
-centimorgan. Or cM=FALSE for morgan.}
+\item{cM}{logical. Specify the unit of marker position. If cM=TRUE, it
+denotes centimorgan; if cM=FALSE, it denotes morgan.}
 
 \item{ns}{integer. The number of individuals for generating the
-individual trait values. The change in this value do not affect
-the outcome of the LRT threshold value significantly.}
+individual trait values. Changes in this value do not significantly
+affect the outcome of the LRT threshold value.}
 
 \item{gv}{numeric. The genetic variance for generating the
-individual trait values. The change in this value do not affect
-the outcome of the LRT threshold value significantly.}
+individual trait values. Changes in this value do not significantly
+affect the outcome of the LRT threshold value.}
 
 \item{speed}{numeric. The walking speed of the QTL analysis (in cM).}
 
-\item{simu}{integer. To decide how many simulation samples will be used
-to compute the LRT threshold using the Gaussian process.}
+\item{simu}{integer. Determines the number of simulation samples that
+will be used to compute the LRT threshold using the Gaussian process.}
 
-\item{d.eff}{logical. Specify whether the dominant effect will be
-considered in the parameter estimation or not for AI or RI population.}
+\item{d.eff}{logical. Specifies whether the dominant effect will be
+considered in the parameter estimation for AI or RI population.}
 
 \item{alpha}{numeric. The type I error rate for the LRT threshold.}
 
-\item{console}{logical. To decide whether the process of the algorithm
-will be shown in the R console or not.}
+\item{console}{logical. Determines whether the process of the algorithm
+will be displayed in the R console or not.}
 }
 \value{
 The LRT threshold for QTL interval mapping.

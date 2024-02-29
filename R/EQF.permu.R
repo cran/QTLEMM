@@ -3,14 +3,14 @@
 #' The EQF matrix cluster permutation process for QTL hotspot detection.
 #'
 #' @param LOD.QTLdetect.result list. The data list of the output from
-#' LOD.QTLdetect.
-#' @param ptime integer. The permutation time.
+#' LOD.QTLdetect().
+#' @param ptime integer. The permutation times.
 #' @param alpha numeric. The type 1 error rate of detecting the hotspot.
-#' @param Q logical. If being TURE, the function will further be carrying
-#' out the population of the Q method as the control group and shown as B
-#' in the output.
-#' @param console logical. To decide whether the process of the algorithm
-#' will be shown in the R console or not.
+#' @param Q logical. When set to TRUE, the function will additionally carry
+#' out the population of the Q method as the control group, which will be
+#' indicated as 'B' in the output.
+#' @param console logical. Determines whether the process of the algorithm
+#' will be displayed in the R console or not.
 #'
 #' @return
 #' \item{EQF.matrix}{The matrix denotes the EQF value of each bin.}

@@ -14,18 +14,18 @@ EQF.permu(
 }
 \arguments{
 \item{LOD.QTLdetect.result}{list. The data list of the output from
-LOD.QTLdetect.}
+LOD.QTLdetect().}
 
-\item{ptime}{integer. The permutation time.}
+\item{ptime}{integer. The permutation times.}
 
 \item{alpha}{numeric. The type 1 error rate of detecting the hotspot.}
 
-\item{Q}{logical. If being TURE, the function will further be carrying
-out the population of the Q method as the control group and shown as B
-in the output.}
+\item{Q}{logical. When set to TRUE, the function will additionally carry
+out the population of the Q method as the control group, which will be
+indicated as 'B' in the output.}
 
-\item{console}{logical. To decide whether the process of the algorithm
-will be shown in the R console or not.}
+\item{console}{logical. Determines whether the process of the algorithm
+will be displayed in the R console or not.}
 }
 \value{
 \item{EQF.matrix}{The matrix denotes the EQF value of each bin.}

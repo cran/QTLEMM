@@ -1,24 +1,23 @@
 #' QTL Hotspot
 #'
-#' This function produces both the numerical and graphical summaries of
-#' the QTL hotspot detection in the genomes that are available on the
-#' web including the flanking markers of QTLs.
+#' This function generates both numerical and graphical summaries of the QTL
+#' hotspot detection in the genomes, including information about the flanking
+#' markers of QTLs.
 #'
-#' @param DataQTL data.frame. A data frame with 5 columns for QTL
-#' information. The first three columns denote the serial number of
-#' QTLs, trait names, and the chromosome numbers. The 4th and 5th denote
-#' the flanking marker positions(cM) of QTLs.
+#' @param DataQTL data.frame. A data frame with 5 columns for QTL information.
+#' The columns represent the serial number of QTLs, the trait names, the
+#' chromosome numbers, the left flanking marker positions(in cM) of QTLs, and
+#' the right flanking marker positions(in cM) of QTLs.
 #' @param DataCrop data.frame. A data frame with 3 columns for chromosome
-#' information consists of the names, center positions(cM) and lengths
-#' of chromosomes.
+#' information consists of the chromosome names, the center positions(in cM)
+#' and the lengths of chromosomes.
 #' @param ScanStep numeric. A value for the length(cM) of every bin.
 #' @param NH integer. A value for the number of spurious hotspots in the
 #' proposed method.
 #' @param NP integer. A value for permutation times to calculate the
 #' threshold.
-#' @param save.pdf logical. A logical variable, if save.pdf is set to be
-#' TRUE, the pdf file of plots will be saved in the working directory
-#' instead of being shown in the console.
+#' @param save.pdf logical. When set to TRUE, the PDF file of plots will be
+#' saved in the working directory instead of being displayed in the console.
 #'
 #' @return
 #' \item{EQF}{The expected QTL frequency(EQF) in every bin per chromosome.}
@@ -32,15 +31,16 @@
 #' different traits in the detected hotspots.
 #'
 #' @note
-#' This program may generate a large amount of graphic output. It is
-#' recommended to save the result in PDF file by the argument "save.pdf".
+#' This program may generate a large amount of graphical output. To manage this,
+#' it's recommended to save the results in a PDF file using the "save.pdf"
+#' argument.
 #'
 #' @export
 #'
 #' @references
 #'
-#' Wu, P.-Y., M.-.H. Yang, and C.-H. KAO 2021 A Statistical Framework
-#' for QTL Hotspot Detection. G3: Genes, Genomes, Genetics: jkab056.
+#' Wu, P.-Y., M.-.H. Yang, and C.-H. KAO 2021 A Statistical Framework for QTL
+#' Hotspot Detection. G3: Genes, Genomes, Genetics: jkab056.
 #'
 #' @examples
 #' # load the example data
@@ -493,5 +493,4 @@ Qhot <- function(DataQTL, DataCrop, ScanStep = 1, NH = 100, NP = 1000, save.pdf 
   if(save.pdf){grDevices::dev.off()}
 
   return(list(EQF = DataF, P.threshold = TV.P2, Q.threshold = TV.Q2, nHot = TableH2))
-
 }

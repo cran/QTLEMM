@@ -32,101 +32,101 @@ IM.search2(
 }
 \arguments{
 \item{marker}{matrix. A k*2 matrix contains the marker information,
-where the row dimension k is the number of markers in the chromosomes.
-The first column labels the chromosomes where the markers are located,
-and the second column labels the positions of QTLs (in morgan (M) or
-centimorgan (cM)). Note that chromosomes and positions must be divided
-in order.}
+where the row dimension 'k' represents the number of markers in the
+chromosomes. The first column labels the chromosomes where the markers
+are located, and the second column labels the positions of markers (in
+morgan (M) or centimorgan (cM)). It's important to note that chromosomes
+and positions must be sorted in order.}
 
-\item{geno}{matrix. A n*k matrix contains the k markers of the n
-individuals. The marker genotypes of P1 homozygote (MM),
+\item{geno}{matrix. A n*k matrix contains the genotypes of k markers
+for n individuals. The marker genotypes of P1 homozygote (MM),
 heterozygote (Mm), and P2 homozygote (mm) are coded as 2, 1, and 0,
-respectively, and NA for missing value.}
+respectively, with NA indicating missing values.}
 
 \item{y}{vector. A vector that contains the phenotype values of
 individuals with genotypes.}
 
-\item{yu}{vector. A vector that contains the phenotype value
-of the individuals without genotypes.}
+\item{yu}{vector. A vector that contains the phenotype values of
+individuals without genotypes.}
 
-\item{sele.g}{character. If sele.g="n", it will consider that the
-data is not a selective genotyping data but the complete genotyping
-data. If sele.g="p", it will consider that the data is a selective
-genotyping data, and use the proposed model (Lee 2014) to analyze.
-If sele.g="t", it will consider that the data is a selective
-genotyping data, and use the truncated model (Lee 2014) to analyze.
-If sele.g="f, it will consider that the data is a selective
-genotyping data, and use the frequency-based model (Lee 2014) to
-analyze. Note that the yu must be input when sele.g="p" of "f".}
+\item{sele.g}{character. Determines the type of data being analyzed:
+If sele.g="n", it considers the data as complete genotyping data. If
+sele.g="f", it treats the data as selective genotyping data and utilizes
+the proposed corrected frequency model (Lee 2014) for analysis; If
+sele.g="t", it considers the data as selective genotyping data and uses
+the truncated model (Lee 2014) for analysis; If sele.g="p", it treats
+the data as selective genotyping data and uses the population
+frequency-based model (Lee 2014) for analysis. Note that the 'yu'
+argument must be provided when sele.g="f" or "p".}
 
-\item{tL}{numeric. The lower truncation point of phenotype value
-when sele.g="t". Note that when sele.g="t" and tL=NULL, the yu
-must be input, and the function will consider the minimum of yu
+\item{tL}{numeric. The lower truncation point of phenotype value when
+sele.g="t". When sele.g="t" and tL=NULL, the 'yu' argument must be
+provided. In this case, the function will consider the minimum of 'yu'
 as the lower truncation point.}
 
-\item{tR}{numeric. The upper truncation point of phenotype value
-when sele.g="t". Note that when sele.g="t" and tR=NULL, the yu
-must be input, and the function will consider the maximum of yu
+\item{tR}{numeric. The upper truncation point of phenotype value when
+sele.g="t". When sele.g="t" and tR=NULL, the 'yu' argument must be
+provided. In this case, the function will consider the maximum of 'yu'
 as the upper truncation point.}
 
-\item{method}{character. method="EM" means the interval mapping method
-by Lander and Botstein (1989) is used in the analysis, while
-method="REG" means  the approximate regression interval mapping method
-by Haley and Knott (1992) is considered in the analysis.}
+\item{method}{character. When method="EM", it indicates that the interval
+mapping method by Lander and Botstein (1989) is used in the analysis.
+Conversely, when method="REG", it indicates that the approximate regression
+interval mapping method by Haley and Knott (1992) is used in the analysis.}
 
-\item{type}{character. The population type of the dataset. Include
+\item{type}{character. The population type of the dataset. Includes
 backcross (type="BC"), advanced intercross population (type="AI"), and
-recombinant inbred population (type="RI").}
+recombinant inbred population (type="RI"). The default value is "RI".}
 
-\item{D.matrix}{matrix. The design matrix of the IM model. If
-D.matrix=NULL, the design matrix will be constructed using the Cockerham’s
-model. In BC population, it is a 2*1 matrix which is 0.5, -0.5 for
-additive effect. In RI or AI population, it is a 3*2 matrix whose first
-column is 1, 0, -1 for additive effect and the second column is 0.5, -0.5,
-0.5 for dominant effect.}
+\item{D.matrix}{matrix. The design matrix of the IM model. If D.matrix=NULL,
+the design matrix will be constructed using Cockerham’s model: In BC
+population, it is a 2*1 matrix with values 0.5 and -0.5 for the additive
+effect; In RI or AI population, it is a 3*2 matrix. The first column
+consists of 1, 0, and -1 for the additive effect, and the second column
+consists of 0.5, -0.5, and 0.5 for the dominant effect.}
 
 \item{ng}{integer. The generation number of the population type. For
-example, the BC1 population is type="BC" with ng=1; the AI F3
-population is type="AI" with ng=3.}
+instance, in a BC1 population where type="BC", ng=1; in an AI F3
+population where type="AI", ng=3.}
 
-\item{cM}{logical. Specify the unit of marker position. cM=TRUE for
-centimorgan. Or cM=FALSE for morgan.}
+\item{cM}{logical. Specify the unit of marker position. If cM=TRUE, it
+denotes centimorgan; if cM=FALSE, it denotes morgan.}
 
 \item{speed}{numeric. The walking speed of the QTL search (in cM).}
 
-\item{crit}{numeric. The convergent criterion of EM algorithm.
-The E and M steps will be iterated until a convergent criterion
-is satisfied. It must be between 0 and 1.}
+\item{crit}{numeric. The convergence criterion of EM algorithm.
+The E and M steps will iterate until a convergence criterion is met.
+It must be a value between 0 and 1.}
 
-\item{d.eff}{logical. Specify whether the dominant effect will be
-considered in the parameter estimation or not for AI or RI population.}
+\item{d.eff}{logical. Specifies whether the dominant effect will be
+considered in the parameter estimation for AI or RI population.}
 
-\item{LRT.thre}{logical or numeric. If being TRUE, the LRT threshold
-will be computed based on the Gaussian stochastic process
-(Kao and Ho 2012). Or users can input a numerical value as the LRT
-threshold to assess the significance of QTL detection.}
+\item{LRT.thre}{logical or numeric. If set to TRUE, the LRT threshold
+will be computed based on the Gaussian stochastic process (Kao and Ho 2012).
+Alternatively, users can input a numerical value as the LRT threshold to
+evaluate the significance of QTL detection.}
 
-\item{simu}{integer. To decide how many simulation samples will be used
-to compute the LRT threshold using the Gaussian process. It must be
-between 50 and 10^8.}
+\item{simu}{integer. Determines the number of simulation samples that
+will be used to compute the LRT (Likelihood Ratio Test) threshold using
+the Gaussian process. It must be a value between 50 and 10^8.}
 
 \item{alpha}{numeric. The type I error rate for the LRT threshold.}
 
-\item{detect}{logical. Whether the significant QTL whose LRT statistic
-is larger than the LRT threshold will be shown in the output dataset or
-not.}
+\item{detect}{logical. Determines whether the significant QTL, whose LRT
+statistic is larger than the LRT threshold, will be displayed in the
+output dataset or not.}
 
-\item{QTLdist}{numeric. The minimum distance (cM) among different
+\item{QTLdist}{numeric. The minimum distance (in cM) among different
 linked significant QTL.}
 
-\item{plot.all}{logical. If being TRUE, output the profile of LRT
-statistics for the genome in one figure.}
+\item{plot.all}{logical. When set to TRUE, it directs the function to
+output the profile of LRT statistics for the genome in one figure.}
 
-\item{plot.chr}{logical. If being TRUE, output the profile of LRT
-statistics for the chromosomes.}
+\item{plot.chr}{logical. When set to TRUE, it instructs the function to
+output the profile of LRT statistics for the chromosomes.}
 
-\item{console}{logical. To decide whether the process of the algorithm
-will be shown in the R console or not.}
+\item{console}{logical. Determines whether the process of the algorithm
+will be displayed in the R console or not.}
 }
 \value{
 \item{effect}{The estimated effects and LRT statistics of all positions.}
@@ -140,8 +140,8 @@ Graphical outputs including LOD value and effect of each position.
 }
 \description{
 Expectation-maximization algorithm for QTL interval mapping to search
-the possible position of QTL in all chromosomes. This function can
-handle the genotype data is selective genotyping.
+for possible positions of QTL in all chromosomes. It can handle genotype
+data which is selective genotyping.
 }
 \examples{
 # load the example data
@@ -153,7 +153,7 @@ yu <- y[y >= quantile(y)[2] & y <= quantile(y)[4]]
 geno.s <- geno[y > quantile(y)[4] | y < quantile(y)[2],]
 
 # run and result
-result <- IM.search2(marker, geno.s, ys, yu, sele.g = "p", type = "RI", ng = 2,
+result <- IM.search2(marker, geno.s, ys, yu, sele.g = "f", type = "RI", ng = 2,
 speed = 7, crit = 10^-3, LRT.thre = 10)
 result$detect.QTL
 }

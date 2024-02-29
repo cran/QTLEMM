@@ -7,24 +7,24 @@
 LOD.QTLdetect(LOD, bin, thre = 3, QTLdist = 20, console = TRUE)
 }
 \arguments{
-\item{LOD}{matrix. The LOD matrix is a t*p matrix, where t is the
-number of traits and p is the number of bins on the chromosomes.
-The missing value should be NA.}
+\item{LOD}{matrix. The LOD matrix, which is a t*p matrix, where t is
+the number of traits and p is the number of bins on the chromosomes.
+Missing values should be denoted as NA in the matrix.}
 
-\item{bin}{matrix. A n*2 matrix represents how many bins are on each
-chromosome, where n is the number of chromosomes. The first column
-denotes the chromosome number, and the second column denote how many
-bins are on that chromosome. Note that chromosomes must be divided
-in order.}
+\item{bin}{matrix. An n*2 matrix that represents the number of bins on
+each chromosome, where n is the number of chromosomes. The first column
+denotes the chromosome number, and the second column denotes how many
+bins are on that chromosome. It's important to ensure that chromosomes
+are divided in order.}
 
-\item{thre}{numeric. The LOD threshold. The LOD score under this
+\item{thre}{numeric. The LOD threshold. Any LOD score under this
 threshold will be calculated as 0.}
 
-\item{QTLdist}{numeric. The minimum distance (bin) among different
+\item{QTLdist}{numeric. The minimum distance (in bins) among different
 linked significant QTL.}
 
-\item{console}{logical. To decide whether the process of the algorithm
-will be shown in the R console or not.}
+\item{console}{logical. Determines whether the process of the algorithm
+will be displayed in the R console or not.}
 }
 \value{
 \item{detect.QTL.number}{The number of detected QTL in each trait.}
@@ -39,7 +39,7 @@ on one chromosome.}
 \item{bin}{The bin information matrix used in this analysis.}
 }
 \description{
-Detect QTL by the likelihood of odds(LOD) matrix.
+Detect QTL by the likelihood of odds (LOD) matrix.
 }
 \examples{
 # load the example data

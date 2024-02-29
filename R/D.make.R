@@ -3,48 +3,49 @@
 #' Generate the genetic design matrix of specified QTL number and effects.
 #'
 #' @param nQTL integer. The number of QTLs.
-#' @param type character. The population type of the dataset. Include
+#' @param type character. The population type of the dataset. Includes
 #' backcross (type="BC"), advanced intercross population (type="AI"), and
-#' recombinant inbred population (type="RI"). The default is type="RI".
-#' @param a integer or vector. A integer or vector to decide the additive
-#' effects of which QTL will be considered in this design matrix. If
+#' recombinant inbred population (type="RI"). The default value is "RI".
+#' @param a integer or vector. A integer or vector to determines which
+#' additive effects of QTLs will be considered in this design matrix. If
 #' a=TRUE, the additive effect of all QTLs will be considered. If
 #' a=FALSE, no additive effect will be considered.
-#' @param d integer or vector. A integer or vector to decide the dominant
-#' effects of which QTL will be considered in this design matrix. If
+#' @param d integer or vector. A integer or vector to determines which
+#' dominant effects of QTLs will be considered in this design matrix. If
 #' d=TRUE, the dominant effect of all QTLs will be considered.If
 #' d=FALSE, no dominant effect will be considered.
-#' @param aa vector or matrix. The additive-by-additive interaction. Tow
-#' format can be used in this parameter. One format is vector, in which
+#' @param aa vector or matrix. The additive-by-additive interaction. Two
+#' format can be used in this parameter. One format is a vector, where
 #' every two elements indicate a combination of additive-by-additive
 #' interaction. The other format is a 2*i matrix, where i is the number
 #' of combinations of interaction, and each column indicates the two
-#' interacting QTLs. Besides, if aa=TRUE, all combinations of
+#' interacting QTLs. Additionally, if aa=TRUE, all combinations of
 #' additive-by-additive interaction will be considered. If aa=FALSE, no
 #' additive-by-additive interaction will be considered.
 #' @param dd vector or matrix. The dominant-by-dominant interaction. The
 #' format is the same as that in aa.
 #' @param ad vector or matrix. The additive-by-dominant interaction. The
-#' format is the same as that in aa. Note that, in each pair of QTLs, the
-#' first element indicates the additive effect, and the second indicates
-#' the dominant effect.
+#' format is the same as that in aa. Note that in each pair of QTLs, the
+#' first element indicates the additive effect, and the second element
+#' indicates the dominant effect.
 #'
 #' @return
-#' The genetic design matrix, whose elements are the coded variables of
-#' the QTL effects. It is a g*p matrix, where g is the number of possible
-#' QTL genotypes, and p is the number of effects in the MIM model.
+#' The genetic design matrix, where the elements represent the coded
+#' variables of the QTL effects. It is a g*p matrix, where g is the number
+#' of possible QTL genotypes, and p is the number of effects in the MIM
+#' model.
 #'
 #' @note
-#' For parameter type, if type="BC", the design matrix contains only
-#' additive effect and additive by additive interaction. If type="AI" or
-#' type="RI", that will contain additive and dominance effects and all
-#' interaction.
+#' For the 'type' parameter, if type="BC", the design matrix exclusively
+#' contains additive effects and additive-by-additive interactions. However,
+#' if type="AI" or type="RI", it encompasses additive and dominance effects
+#' along with all interactions.
 #'
-#' For example, when aa=c(1,3,2,4,5,6), indicates that the interaction
+#' For instance, when aa=c(1,3,2,4,5,6), it denotes that the interaction
 #' between QTL1 and QTL3, the interaction between QTL2 and QTL4, and that
-#' between QTL5 and QTL6 will be considered in the design matrix. Besides,
+#' between QTL5 and QTL6 will be considered in the design matrix. Furthermore,
 #' the matrix format can be expressed as aa=matrix(c(1,3,2,4,5,6),2,3).
-#' The parameters DD and AD are also expressed in the same way.
+#' Similarly, parameters DD and AD are also expressed in the same format.
 #'
 #' @export
 #'

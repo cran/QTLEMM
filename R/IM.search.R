@@ -1,63 +1,63 @@
 #' QTL search by IM
 #'
 #' Expectation-maximization algorithm for QTL interval mapping to search
-#' the possible position of QTL in all chromosomes.
+#' for possible position of QTL in all chromosomes.
 #'
 #' @param marker matrix. A k*2 matrix contains the marker information,
-#' where the row dimension k is the number of markers in the chromosomes.
-#' The first column labels the chromosomes where the markers are located,
-#' and the second column labels the positions of QTLs (in morgan (M) or
-#' centimorgan (cM)). Note that chromosomes and positions must be divided
-#' in order.
-#' @param geno matrix. A n*k matrix contains the k markers of the n
-#' individuals. The marker genotypes of P1 homozygote (MM),
+#' where the row dimension 'k' represents the number of markers in the
+#' chromosomes. The first column labels the chromosomes where the markers
+#' are located, and the second column labels the positions of markers (in
+#' morgan (M) or centimorgan (cM)). It's important to note that chromosomes
+#' and positions must be sorted in order.
+#' @param geno matrix. A n*k matrix contains the genotypes of k markers
+#' for n individuals. The marker genotypes of P1 homozygote (MM),
 #' heterozygote (Mm), and P2 homozygote (mm) are coded as 2, 1, and 0,
-#' respectively, and NA for missing value.
+#' respectively, with NA indicating missing values.
 #' @param y vector. A vector with n elements contains the phenotype values
 #' of individuals.
-#' @param method character. method="EM" means the interval mapping method
-#' by Lander and Botstein (1989) is used in the analysis, while
-#' method="REG" means  the approximate regression interval mapping method
-#' by Haley and Knott (1992) is considered in the analysis.
-#' @param type character. The population type of the dataset. Include
+#' @param method character. When method="EM", it indicates that the interval
+#' mapping method by Lander and Botstein (1989) is used in the analysis.
+#' Conversely, when method="REG", it indicates that the approximate regression
+#' interval mapping method by Haley and Knott (1992) is used in the analysis.
+#' @param type character. The population type of the dataset. Includes
 #' backcross (type="BC"), advanced intercross population (type="AI"), and
-#' recombinant inbred population (type="RI").
-#' @param D.matrix matrix. The design matrix of the IM model. If
-#' D.matrix=NULL, the design matrix will be constructed using the Cockerham’s
-#' model. In BC population, it is a 2*1 matrix which is 0.5, -0.5 for
-#' additive effect. In RI or AI population, it is a 3*2 matrix whose first
-#' column is 1, 0, -1 for additive effect and the second column is 0.5, -0.5,
-#' 0.5 for dominant effect.
+#' recombinant inbred population (type="RI"). The default value is "RI".
+#' @param D.matrix matrix. The design matrix of the IM model. If D.matrix=NULL,
+#' the design matrix will be constructed using Cockerham’s model: In BC
+#' population, it is a 2*1 matrix with values 0.5 and -0.5 for the additive
+#' effect; In RI or AI population, it is a 3*2 matrix. The first column
+#' consists of 1, 0, and -1 for the additive effect, and the second column
+#' consists of 0.5, -0.5, and 0.5 for the dominant effect.
 #' @param ng integer. The generation number of the population type. For
-#' example, the BC1 population is type="BC" with ng=1; the AI F3
-#' population is type="AI" with ng=3.
-#' @param cM logical. Specify the unit of marker position. cM=TRUE for
-#' centimorgan. Or cM=FALSE for morgan.
+#' instance, in a BC1 population where type="BC", ng=1; in an AI F3
+#' population where type="AI", ng=3.
+#' @param cM logical. Specify the unit of marker position. If cM=TRUE, it
+#' denotes centimorgan; if cM=FALSE, it denotes morgan.
 #' @param speed numeric. The walking speed of the QTL search (in cM).
-#' @param crit numeric. The convergent criterion of EM algorithm.
-#' The E and M steps will be iterated until a convergent criterion
-#' is satisfied. It must be between 0 and 1.
-#' @param d.eff logical. Specify whether the dominant effect will be
-#' considered in the parameter estimation or not for AI or RI population.
-#' @param LRT.thre logical or numeric. If being TRUE, the LRT threshold
-#' will be computed based on the Gaussian stochastic process
-#' (Kao and Ho 2012). Or users can input a numerical value as the LRT
-#' threshold to assess the significance of QTL detection.
-#' @param simu integer. To decide how many simulation samples will be used
-#' to compute the LRT threshold using the Gaussian process. It must be
-#' between 50 and 10^8.
+#' @param crit numeric. The convergence criterion of EM algorithm.
+#' The E and M steps will iterate until a convergence criterion is met.
+#' It must be a value between 0 and 1.
+#' @param d.eff logical. Specifies whether the dominant effect will be
+#' considered in the parameter estimation for AI or RI population.
+#' @param LRT.thre logical or numeric. If set to TRUE, the LRT threshold
+#' will be computed based on the Gaussian stochastic process (Kao and Ho 2012).
+#' Alternatively, users can input a numerical value as the LRT threshold to
+#' evaluate the significance of QTL detection.
+#' @param simu integer. Determines the number of simulation samples that
+#' will be used to compute the LRT threshold using the Gaussian process.
+#' It must be a value between 50 and 10^8.
 #' @param alpha numeric. The type I error rate for the LRT threshold.
-#' @param detect logical. Whether the significant QTL whose LRT statistic
-#' is larger than the LRT threshold will be shown in the output dataset or
-#' not.
-#' @param QTLdist numeric. The minimum distance (cM) among different
+#' @param detect logical. Determines whether the significant QTL, whose LRT
+#' statistic is larger than the LRT threshold, will be displayed in the
+#' output dataset or not.
+#' @param QTLdist numeric. The minimum distance (in cM) among different
 #' linked significant QTL.
-#' @param plot.all logical. If being TRUE, output the profile of LRT
-#' statistics for the genome in one figure.
-#' @param plot.chr logical. If being TRUE, output the profile of LRT
-#' statistics for the chromosomes.
-#' @param console logical. To decide whether the process of the algorithm will
-#' be shown in the R console or not.
+#' @param plot.all logical. When set to TRUE, it directs the function to
+#' output the profile of LRT statistics for the genome in one figure.
+#' @param plot.chr logical. When set to TRUE, it instructs the function to
+#' output the profile of LRT statistics for the chromosomes.
+#' @param console logical. Determines whether the process of the algorithm
+#' will be displayed in the R console or not.
 #'
 #' @return
 #' \item{effect}{The estimated effects and LRT statistics of all positions.}
@@ -367,4 +367,5 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   }
 
   result <- list(effect = effect, LRT.threshold = LRT.threshold, detect.QTL = detect.QTL)
+  return(result)
 }

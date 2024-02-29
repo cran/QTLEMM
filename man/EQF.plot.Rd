@@ -10,18 +10,18 @@ EQF.plot(result, plot.all = TRUE, plot.chr = TRUE)
 \item{result}{list. The data list of the output from LOD.QTLdetect()
 or EQF.permu().}
 
-\item{plot.all}{logical. If being TURE, output one figure of the
-EQF values over the bins.}
+\item{plot.all}{logical. When set to TRUE, it directs the function to
+output one figure of the EQF values over the bins.}
 
-\item{plot.chr}{logical. If being TURE, output the figures of the
-EQF values over the bins of each chromosome.}
+\item{plot.chr}{logical. When set to TRUE, it instructs the function to
+output the figures of the EQF values over the bins for each chromosome.}
 }
 \value{
 One or several EQF plots.
 }
 \description{
-Depict the EQF plot by the result of the permutation process to
-detect the QTL hotspot.
+Generate an EQF plot based on the result of the permutation process
+used to detect the QTL hotspot.
 }
 \examples{
 # load the example data

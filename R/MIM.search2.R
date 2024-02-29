@@ -1,77 +1,75 @@
 #' QTL search by MIM with Seletive Genotyping
 #'
-#' Expectation-maximization algorithm for QTL multiple interval mapping.
-#' Find one more QTL in the presence of some known QTLs. This funtion
-#' can handle the genotype witch is seletive genotyping.
+#' Expectation-maximization algorithm for QTL multiple interval mapping to
+#' find one more QTL in the presence of some known QTLs. It can handle
+#' genotype data which is selective genotyping.
 #'
-#' @param QTL matrix. A q*2 matrix contains the QTL information, where
-#' the row dimension q is the number of QTLs in the chromosomes. The
-#' first column labels the chromosomes where the QTLs are located, and
-#' the second column labels the positions of QTLs (in morgan (M) or
-#' centimorgan (cM)). Note that chromosomes and positions must be divided
-#' in order.
+#' @param QTL matrix. A q*2 matrix contains the QTL information, where the
+#' row dimension 'q' represents the number of QTLs in the chromosomes. The
+#' first column labels the chromosomes where the QTLs are located, and the
+#' second column labels the positions of QTLs (in morgan (M) or centimorgan
+#' (cM)).
 #' @param marker matrix. A k*2 matrix contains the marker information,
-#' where the row dimension k is the number of markers in the chromosomes.
-#' The first column labels the chromosomes where the markers are located,
-#' and the second column labels the positions of QTLs (in morgan (M) or
-#' centimorgan (cM)). Note that chromosomes and positions must be divided
-#' in order.
-#' @param geno matrix. A n*k matrix contains the k markers of the n
-#' individuals. The marker genotypes of P1 homozygote (MM),
+#' where the row dimension 'k' represents the number of markers in the
+#' chromosomes. The first column labels the chromosomes where the markers
+#' are located, and the second column labels the positions of markers (in
+#' morgan (M) or centimorgan (cM)). It's important to note that chromosomes
+#' and positions must be sorted in order.
+#' @param geno matrix. A n*k matrix contains the genotypes of k markers
+#' for n individuals. The marker genotypes of P1 homozygote (MM),
 #' heterozygote (Mm), and P2 homozygote (mm) are coded as 2, 1, and 0,
-#' respectively, and NA for missing value.
+#' respectively, with NA indicating missing values.
 #' @param y vector. A vector that contains the phenotype values of
 #' individuals with genotypes.
-#' @param yu vector. A vector that contains the phenotype value
-#' of the individuals without genotypes.
-#' @param sele.g character. If sele.g="n", it will consider that the
-#' data is not a selective genotyping data but the complete genotyping
-#' data. If sele.g="p", it will consider that the data is a selective
-#' genotyping data, and use the proposed model (Lee 2014) to analyze.
-#' If sele.g="t", it will consider that the data is a selective
-#' genotyping data, and use the truncated model (Lee 2014) to analyze.
-#' If sele.g="f, it will consider that the data is a selective
-#' genotyping data, and use the frequency-based model (Lee 2014) to
-#' analyze. Note that the yu must be input when sele.g="p" of "f".
-#' @param tL numeric. The lower truncation point of phenotype value
-#' when sele.g="t". Note that when sele.g="t" and tL=NULL, the yu
-#' must be input and the function will consider the minimum of yu
+#' @param yu vector. A vector that contains the phenotype values of
+#' individuals without genotypes.
+#' @param sele.g character. Determines the type of data being analyzed:
+#' If sele.g="n", it considers the data as complete genotyping data. If
+#' sele.g="f", it treats the data as selective genotyping data and utilizes
+#' the proposed corrected frequency model (Lee 2014) for analysis; If
+#' sele.g="t", it considers the data as selective genotyping data and uses
+#' the truncated model (Lee 2014) for analysis; If sele.g="p", it treats
+#' the data as selective genotyping data and uses the population
+#' frequency-based model (Lee 2014) for analysis. Note that the 'yu'
+#' argument must be provided when sele.g="f" or "p".
+#' @param tL numeric. The lower truncation point of phenotype value when
+#' sele.g="t". When sele.g="t" and tL=NULL, the 'yu' argument must be
+#' provided. In this case, the function will consider the minimum of 'yu'
 #' as the lower truncation point.
-#' @param tR numeric. The upper truncation point of phenotype value
-#' when sele.g="t". Note that when sele.g="t" and tR=NULL, the yu
-#' must be input and the function will consider the maximum of yu
+#' @param tR numeric. The upper truncation point of phenotype value when
+#' sele.g="t". When sele.g="t" and tR=NULL, the 'yu' argument must be
+#' provided. In this case, the function will consider the maximum of 'yu'
 #' as the upper truncation point.
-#' @param method character. method="EM" means the interval mapping method
-#' by Lander and Botstein (1989) is used in the analysis, while
-#' method="REG" means  the approximate regression interval mapping method
-#' by Haley and Knott (1992) is considered in the analysis.
-#' @param type character. The population type of the dataset. Include
+#' @param method character. When method="EM", it indicates that the interval
+#' mapping method by Lander and Botstein (1989) is used in the analysis.
+#' Conversely, when method="REG", it indicates that the approximate regression
+#' interval mapping method by Haley and Knott (1992) is used in the analysis.
+#' @param type character. The population type of the dataset. Includes
 #' backcross (type="BC"), advanced intercross population (type="AI"), and
-#' recombinant inbred population (type="RI").
+#' recombinant inbred population (type="RI"). The default value is "RI".
 #' @param ng integer. The generation number of the population type. For
-#' example, the BC1 population is type="BC" with ng=1; the AI F3
-#' population is type="AI" with ng=3.
+#' instance, in a BC1 population where type="BC", ng=1; in an AI F3
+#' population where type="AI", ng=3.
 #' @param D.matrix matrix. The design matrix of QTL effects is a g*p matrix,
 #' where g is the number of possible QTL genotypes, and p is the number of
-#' effects considered in the MIM model. Note that the QTL number of the
-#' design matrix must be the original QTL number plus one. The design
-#' matrix can be easily generated by the function D.make(). If being NULL,
-#' it will automatically generate a design matrix with all additive and
+#' effects considered in the MIM model. It's important to note that the QTL
+#' number of the design matrix must be the original QTL number plus one. The
+#' design matrix can be easily generated by the function D.make(). If set to
+#' NULL, it will automatically generate a design matrix with all additive and
 #' dominant effects and without any epistasis effect.
-#' @param cM logical. Specify the unit of marker position. cM=TRUE for
-#' centi-Morgan. Or cM=FALSE for Morgan.
+#' @param cM logical. Specify the unit of marker position. If cM=TRUE, it
+#' denotes centimorgan; if cM=FALSE, it denotes morgan.
 #' @param speed numeric. The walking speed of the QTL search (in cM).
-#' @param QTLdist numeric. The minimum distance (cM) among different
-#' linked significant QTL. The position near the position of the known
-#' QTLs under this distance will not be considered as the candidate position
-#' in the search process.
-#' @param link logical. If being False, positions on the same chromosomes
+#' @param QTLdist numeric. The minimum distance (in cM) among different
+#' linked significant QTL. Positions near the known QTLs within this distance
+#' will not be considered as candidate positions in the search process.
+#' @param link logical. When set to False, positions on the same chromosomes
 #' as the known QTLs will not be searched.
-#' @param crit numeric. The convergence criterion of the EM algorithm.
-#' The E and M steps will be iterated until a convergence criterion
-#' is satisfied. It must be between 0 and 1.
-#' @param console logical. To decide whether the process of the algorithm
-#' will be shown in the R console or not.
+#' @param crit numeric. The convergence criterion of EM algorithm.
+#' The E and M steps will iterate until a convergence criterion is met.
+#' It must be a value between 0 and 1.
+#' @param console logical. Determines whether the process of the algorithm
+#' will be displayed in the R console or not.
 #'
 #' @return
 #' \item{effect}{The estimated effects, log-likelihood value, and LRT
@@ -110,7 +108,7 @@
 #'
 #' # run and result
 #' QTL <- c(1, 23)
-#' result <- MIM.search2(QTL, marker, geno.s, ys, yu, sele.g = "p",
+#' result <- MIM.search2(QTL, marker, geno.s, ys, yu, sele.g = "f",
 #'  type = "RI", ng = 2, speed = 15, QTLdist = 50)
 #' result$QTL.best
 #' result$effect.best

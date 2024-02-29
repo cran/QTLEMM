@@ -1,45 +1,43 @@
 #' Generate Q Matrix
 #'
-#' Generate the conditional probability matrix by the information of QTL
-#' and marker and the genotype data.
+#' Generate the conditional probability matrix using the information of QTL
+#' and marker, along with the genotype data.
 #'
-#' @param QTL matrix. A q*2 matrix contains the QTL information, where
-#' the row dimension q is the number of QTLs in the chromosomes. The
-#' first column labels the chromosomes where the QTLs are located, and
-#' the second column labels the positions of QTLs (in morgan (M) or
-#' centimorgan (cM)). Note that chromosomes and positions must be divided
-#' in order.
+#' @param QTL matrix. A q*2 matrix contains the QTL information, where the
+#' row dimension 'q' represents the number of QTLs in the chromosomes. The
+#' first column labels the chromosomes where the QTLs are located, and the
+#' second column labels the positions of QTLs (in morgan (M) or centimorgan
+#' (cM)).
 #' @param marker matrix. A k*2 matrix contains the marker information,
-#' where the row dimension k is the number of markers in the chromosomes.
-#' The first column labels the chromosomes where the markers are located,
-#' and the second column labels the positions of QTLs (in morgan (M) or
-#' centimorgan (cM)). Note that chromosomes and positions must be divided
-#' in order.
-#' @param geno matrix. A n*k matrix contains the k markers of the n
-#' individuals. The marker genotypes of P1 homozygote (MM),
+#' where the row dimension 'k' represents the number of markers in the
+#' chromosomes. The first column labels the chromosomes where the markers
+#' are located, and the second column labels the positions of markers (in
+#' morgan (M) or centimorgan (cM)). It's important to note that chromosomes
+#' and positions must be sorted in order.
+#' @param geno matrix. A n*k matrix contains the genotypes of k markers
+#' for n individuals. The marker genotypes of P1 homozygote (MM),
 #' heterozygote (Mm), and P2 homozygote (mm) are coded as 2, 1, and 0,
-#' respectively, and NA for missing value.
-#' @param interval logical. When the QTL with the same position of a
-#' marker, whether the marker will be skipped and not be regarded as a
-#' flanking marker or not. interval=TRUE presents the marker will be
-#' skipped.
-#' @param type character. The population type of the dataset. Include
+#' respectively, with NA indicating missing values.
+#' @param interval logical. When set to interval=TRUE, if a QTL shares the
+#' same position as a marker, the marker will be skipped and not considered
+#' as a flanking marker.
+#' @param type character. The population type of the dataset. Includes
 #' backcross (type="BC"), advanced intercross population (type="AI"), and
-#' recombinant inbred population (type="RI").
+#' recombinant inbred population (type="RI"). The default value is "RI".
 #' @param ng integer. The generation number of the population type. For
-#' example, the BC1 population is type="BC" with ng=1; the AI F3
-#' population is type="AI" with ng=3.
-#' @param cM logical. Specify the unit of marker position. cM=TRUE for
-#' centimorgan. Or cM=FALSE for morgan.
+#' instance, in a BC1 population where type="BC", ng=1; in an AI F3
+#' population where type="AI", ng=3.
+#' @param cM logical. Specify the unit of marker position. If cM=TRUE, it
+#' denotes centimorgan; if cM=FALSE, it denotes morgan.
 #'
 #' @return
 #' The output contains k conditional probability matrices for the k
 #' flanking marker pairs (the k Q-matrices) and a conditional
-#' probability matrix of each QTL for all individuals (the cp-matrix,
-#' if the genotype data of testing population is input).
+#' probability matrix of each QTL for all individuals (the cp-matrix)
+#' provided the genotype data of the testing population is input..
 #'
 #' @note
-#' If geno=NULL, the function can be run too and the output will
+#' If geno=NULL, the function can still be executed, and the output will
 #' contain k Q-matrices but no cp-matrix.
 #'
 #' @export

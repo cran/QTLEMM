@@ -1,38 +1,37 @@
 #' Progeny Simulation
 #'
-#' Generate the simulated phenotype and genotype data for a specified
+#' Generate simulated phenotype and genotype data for a specified
 #' generation from various breeding schemes.
 #'
-#' @param QTL matrix. A q*2 matrix contains the QTL information, where
-#' the row dimension q is the number of QTLs in the chromosomes. The
-#' first column labels the chromosomes where the QTLs are located, and
-#' the second column labels the positions of QTLs (in morgan (M) or
-#' centimorgan (cM)). Note that chromosomes and positions must be divided
-#' in order.
+#' @param QTL matrix. A q*2 matrix contains the QTL information, where the
+#' row dimension 'q' represents the number of QTLs in the chromosomes. The
+#' first column labels the chromosomes where the QTLs are located, and the
+#' second column labels the positions of QTLs (in morgan (M) or centimorgan
+#' (cM)).
 #' @param marker matrix. A k*2 matrix contains the marker information,
-#' where the row dimension k is the number of markers in the chromosomes.
-#' The first column labels the chromosomes where the markers are located,
-#' and the second column labels the positions of QTLs (in morgan (M) or
-#' centimorgan (cM)). Note that chromosomes and positions must be divided
-#' in order.
-#' @param type character. The population type of the dataset. Include
+#' where the row dimension 'k' represents the number of markers in the
+#' chromosomes. The first column labels the chromosomes where the markers
+#' are located, and the second column labels the positions of markers (in
+#' morgan (M) or centimorgan (cM)). It's important to note that chromosomes
+#' and positions must be sorted in order.
+#' @param type character. The population type of the dataset. Includes
 #' backcross (type="BC"), advanced intercross population (type="AI"), and
-#' recombinant inbred population (type="RI").
+#' recombinant inbred population (type="RI"). The default value is "RI".
 #' @param ng integer. The generation number of the population type. For
-#' example, the BC1 population is type="BC" with ng=1; the AI F3
-#' population is type="AI" with ng=3.
-#' @param cM logical. Specify the unit of marker position. cM=TRUE for
-#' centi-Morgan. Or cM=FALSE for Morgan.
+#' instance, in a BC1 population where type="BC", ng=1; in an AI F3
+#' population where type="AI", ng=3.
+#' @param cM logical. Specify the unit of marker position. If cM=TRUE, it
+#' denotes centimorgan; if cM=FALSE, it denotes morgan.
 #' @param  E.vector vector. Set the effect of QTLs. It should be a named
-#' vector, and the name of elements should be the effects of QTLs and their
-#' interaction. For example, the additive effect of QTL1 is coded to “a1”;
-#' the dominant effect of QTL2 is coded to “d2”; and the interaction of the
-#' additive effect of QTL2 and the dominant effect of QTL1 is coded to
-#' “a2:d1”. So that, if the additive effect of QTL1 is 2, the dominant
-#' effect of QTL2 is 5, and the interaction of the additive effect of QTL2
-#' and the dominant effect of QTL1 is 3, the user should input
-#' E.vector=c("a1"=2, "d2"=5, "a2:d1"=3). If E.vector=NULL, the phenotypic
-#' value will not be simulated.
+#' vector, where the names of elements represent the effects of QTLs and
+#' their interactions. For example: the additive effect of QTL1 is coded as
+#' "a1"; the dominant effect of QTL2 is coded as "d2"; the interaction of
+#' the additive effect of QTL2 and the dominant effect of QTL1 is coded as
+#' "a2:d1". So, if the additive effect of QTL1 is 2, the dominant effect of
+#' QTL2 is 5, and the interaction of the additive effect of QTL2 and the
+#' dominant effect of QTL1 is 3, the user should input: E.vector = c("a1"=2,
+#' "d2"=5, "a2:d1"=3). If E.vector=NULL, the phenotypic value will not be
+#' simulated.
 #' @param h2 numeric. Set the heritability for simulated phenotypes. It
 #' should be a number between 0 and 1.
 #' @param size numeric. The population size of simulated progeny.
