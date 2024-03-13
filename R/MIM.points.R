@@ -63,10 +63,10 @@
 #'
 #' KAO, C.-H. and Z.-B. ZENG 1997 General formulas for obtaining the maximum
 #' likelihood estimates and the asymptotic variance-covariance matrix in QTL
-#' mapping when using the EM algorithm. Biometrics 53, 653-665.
+#' mapping when using the EM algorithm. Biometrics 53, 653-665. <doi: 10.2307/2533965.>
 #'
 #' KAO, C.-H., Z.-B. ZENG and R. D. TEASDALE 1999 Multiple interval mapping
-#' for Quantitative Trait Loci. Genetics 152: 1203-1216.
+#' for Quantitative Trait Loci. Genetics 152: 1203-1216. <doi: 10.1093/genetics/152.3.1203>
 #'
 #' @seealso
 #' \code{\link[QTLEMM]{EM.MIM}}

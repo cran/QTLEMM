@@ -41,7 +41,7 @@
 #' @references
 #'
 #' KAO, C.-H. and H.-A. Ho 2012 A score-statistic approach for determining
-#' threshold values in QTL mapping. Frontiers in Bioscience. E4, 2670-2682.
+#' threshold values in QTL mapping. Frontiers in Bioscience. E4, 2670-2682. <doi: 10.2741/e582>
 #'
 #' @seealso
 #' \code{\link[mvtnorm]{rmvnorm}}

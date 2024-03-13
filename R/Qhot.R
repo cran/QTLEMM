@@ -40,7 +40,7 @@
 #' @references
 #'
 #' Wu, P.-Y., M.-.H. Yang, and C.-H. KAO 2021 A Statistical Framework for QTL
-#' Hotspot Detection. G3: Genes, Genomes, Genetics: jkab056.
+#' Hotspot Detection. G3: Genes, Genomes, Genetics: jkab056. <doi: 10.1093/g3journal/jkab056>
 #'
 #' @examples
 #' # load the example data
