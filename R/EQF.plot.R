@@ -38,9 +38,9 @@ EQF.plot <- function(result, plot.all = TRUE, plot.chr = TRUE){
   name0 <- names(dat)
   if(length(name0) == 6){
     datatest <- name0 != c("detect.QTL.number", "QTL.matrix", "EQF.matrix",
-                           "linkage.QTL.number", "LOD.threshole", "bin")
+                           "linkage.QTL.number", "LOD.threshold", "bin")
   } else if (length(name0) == 9){
-    datatest <- name0 != c("EQF.matrix", "bin", "LOD.threshole", "cluster.number", "cluster.id",
+    datatest <- name0 != c("EQF.matrix", "bin", "LOD.threshold", "cluster.number", "cluster.id",
                            "cluster.matrix", "permu.matrix.cluster", "permu.matrix.Q", "EQF.threshold")
   } else {
     stop("Input data error, please input the original output data of LOD.QTLdetect or EQF.permu.", call. = FALSE)
@@ -55,7 +55,7 @@ EQF.plot <- function(result, plot.all = TRUE, plot.chr = TRUE){
 
   EQF <- dat$EQF.matrix
   clumatrix <- dat$cluster.matrix
-  thre <- dat$LOD.threshole
+  thre <- dat$LOD.threshold
   eqfthre <- dat$EQF.threshold
   bin <- dat$bin
   nc <- nrow(bin)

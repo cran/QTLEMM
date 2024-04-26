@@ -383,7 +383,7 @@ Qhot <- function(DataQTL, DataCrop, ScanStep = 1, NH = 100, NP = 1000, save.pdf 
 
         Hotspot <- DataHotspot[[i]]
         Y1 <- (seq(yb*0.4, yb*0.6, length = 2))
-        color <- c("Navy", "red")
+        color <- c("navy", "red")
         for(k in 1:2){
           Hot.k <- NH:(NH+1)
           X1 <- Hotspot[[Hot.k[k]]]

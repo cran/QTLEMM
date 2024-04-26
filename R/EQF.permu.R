@@ -15,7 +15,7 @@
 #' @return
 #' \item{EQF.matrix}{The matrix denotes the EQF value of each bin.}
 #' \item{bin}{The bin information matrix used in this analysis.}
-#' \item{LOD.threshole}{The LOD threshold used in this analysis.}
+#' \item{LOD.threshold}{The LOD threshold used in this analysis.}
 #' \item{cluster.number}{The number of QTLs in each cluster group.}
 #' \item{cluster.id}{The serial number of traits in each cluster group.}
 #' \item{cluster.matrix}{The new EQF matrix from the clustering process.}
@@ -47,7 +47,7 @@
 EQF.permu <- function(LOD.QTLdetect.result, ptime = 1000, alpha = 0.05, Q = TRUE, console = TRUE){
 
   datatest <- names(LOD.QTLdetect.result) != c("detect.QTL.number", "QTL.matrix", "EQF.matrix",
-                                               "linkage.QTL.number", "LOD.threshole", "bin")
+                                               "linkage.QTL.number", "LOD.threshold", "bin")
   if(TRUE %in% (datatest) | length(datatest) != 6){
     stop("Input data error, please input the original output data of LOD.QTLdetect.", call. = FALSE)
   }
@@ -69,7 +69,7 @@ EQF.permu <- function(LOD.QTLdetect.result, ptime = 1000, alpha = 0.05, Q = TRUE
   EQF <- dat$EQF.matrix
   nt <- nrow(detect)
   ns <- ncol(detect)
-  thre <- dat$LOD.threshole
+  thre <- dat$LOD.threshold
   bin <- dat$bin
   nc <- nrow(bin)
   lcr <- bin[, 2]
@@ -233,7 +233,7 @@ EQF.permu <- function(LOD.QTLdetect.result, ptime = 1000, alpha = 0.05, Q = TRUE
 
   eqfthre <- cbind(eqfthre, real.spot.num)
 
-  return(list(EQF.matrix = EQF, bin = bin, LOD.threshole = thre, cluster.number = Lagend, cluster.id = cluster,
+  return(list(EQF.matrix = EQF, bin = bin, LOD.threshold = thre, cluster.number = Lagend, cluster.id = cluster,
               cluster.matrix = clumatrix, permu.matrix.cluster = permu.clu, permu.matrix.Q = permu.q,
               EQF.threshold = eqfthre))
 }

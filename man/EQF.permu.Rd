@@ -30,7 +30,7 @@ will be displayed in the R console or not.}
 \value{
 \item{EQF.matrix}{The matrix denotes the EQF value of each bin.}
 \item{bin}{The bin information matrix used in this analysis.}
-\item{LOD.threshole}{The LOD threshold used in this analysis.}
+\item{LOD.threshold}{The LOD threshold used in this analysis.}
 \item{cluster.number}{The number of QTLs in each cluster group.}
 \item{cluster.id}{The serial number of traits in each cluster group.}
 \item{cluster.matrix}{The new EQF matrix from the clustering process.}

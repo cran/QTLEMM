@@ -35,7 +35,7 @@ score is under the LOD threshold; other positions are shown as NA.}
 \item{linkage.QTL.number}{The linkage QTL number of all detected
 QTL. In other words, it is the table that denote how many QTL are
 on one chromosome.}
-\item{LOD.threshole}{The LOD threshold used in this analysis.}
+\item{LOD.threshold}{The LOD threshold used in this analysis.}
 \item{bin}{The bin information matrix used in this analysis.}
 }
 \description{

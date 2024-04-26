@@ -26,7 +26,7 @@
 #' \item{linkage.QTL.number}{The linkage QTL number of all detected
 #' QTL. In other words, it is the table that denote how many QTL are
 #' on one chromosome.}
-#' \item{LOD.threshole}{The LOD threshold used in this analysis.}
+#' \item{LOD.threshold}{The LOD threshold used in this analysis.}
 #' \item{bin}{The bin information matrix used in this analysis.}
 #'
 #' @export
@@ -170,7 +170,6 @@ LOD.QTLdetect <- function(LOD, bin, thre = 3, QTLdist = 20, console = TRUE){
   link <- table(link)
 
   EQF <- matrix(0, nt, ns)
-  cat("step", "\t", "process", "\n")
   t0 <- Sys.time()
   for(i in 1:nt){
     if(console){
@@ -220,5 +219,5 @@ LOD.QTLdetect <- function(LOD, bin, thre = 3, QTLdist = 20, console = TRUE){
   EQF.all <- apply(EQF, 2, sum)
 
   return(list(detect.QTL.number = qtldetect, QTL.matrix = det, EQF.matrix = EQF,
-              linkage.QTL.number = link, LOD.threshole = thre, bin = bin))
+              linkage.QTL.number = link, LOD.threshold = thre, bin = bin))
 }
