@@ -86,13 +86,13 @@ EQF.plot <- function(result, plot.all = TRUE, plot.chr = TRUE){
   if(plot.all & nc>1){
     graphics::par(mfrow = c(1, 1))
     graphics::par(mai = c(1, 1, 1, 1))
-    ma <- paste("LOD thresholds =", thre)
+    ma <- paste("LOD threshold =", thre)
     if(length(clumatrix) > 0){
-      ma <- paste("LOD thresholds =", thre, "  # of group =", nrow(clumatrix))
+      ma <- paste("LOD threshold =", thre, "  # of group =", nrow(clumatrix))
       graphics::par(mai = c(1, 1, 1, 1.5))
     }
     plot(x0, eqf.all, type = "h", ylab = "EQF", xlab = "chromosome", main = ma,
-         xaxt = "n", ylim = c(0, yli), yaxt = "n",  cex.main = 2, cex.lab = 1.2, axes = FALSE)
+         xaxt = "n", ylim = c(0, yli), yaxt = "n",  cex.main = 1.5, cex.lab = 1.2, axes = FALSE)
     graphics::axis(side = 1, pos = -yli/35, at = xn, labels = 1:nc, cex.axis = 1.2, tick = FALSE)
     lse <- 4000/max(x0)
     graphics::segments(x0, rep(-yli/35, length(x0)), x0, rep(-yli/70, length(x0)), lwd = lse)
@@ -123,8 +123,8 @@ EQF.plot <- function(result, plot.all = TRUE, plot.chr = TRUE){
     }
     for(i in 1:nc){
       eqf <- eqf.all[cr0 == i]
-      plot(eqf, type = "h", ylab = "EQF", xlab = "position(bin)", main = paste("chr", i, "   LOD thresholds = ", thre),
-           ylim = c(0, max(eqf.all)*1.2), yaxt = "n", cex.main = 2, cex.lab = 1.2)
+      plot(eqf, type = "h", ylab = "EQF", xlab = "position (bin)", main = paste("chr", i, "   LOD threshold = ", thre),
+           ylim = c(0, max(eqf.all)*1.2), yaxt = "n", cex.main = 1.5, cex.lab = 1.2)
       if(length(eqfthre)>0){
         for(k in 1:nrow(eqfthre)){
           graphics::axis(2, eqfthre[k, 1], las = 2.5)
