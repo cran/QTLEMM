@@ -7,7 +7,7 @@
 #' @param ptime integer. The permutation times.
 #' @param alpha numeric. The type 1 error rate of detecting the hotspot.
 #' @param Q logical. When set to TRUE, the function will additionally carry
-#' out the population of the Q method as the control group, which will be
+#' out the permutation of the Q method as the control group, which will be
 #' indicated as 'B' in the output.
 #' @param console logical. Determines whether the process of the algorithm
 #' will be displayed in the R console or not.
@@ -18,7 +18,7 @@
 #' \item{LOD.threshold}{The LOD threshold used in this analysis.}
 #' \item{cluster.number}{The number of QTLs in each cluster group.}
 #' \item{cluster.id}{The serial number of traits in each cluster group.}
-#' \item{cluster.matrix}{The new EQF matrix from the clustering process.}
+#' \item{cluster.matrix}{The new EQF matrix after the clustering process.}
 #' \item{permu.matrix.cluster}{The permutation result of the clustering
 #' method, which has been sorted by order.}
 #' \item{permu.matrix.Q}{The permutation result of the Q method, which has
@@ -98,9 +98,7 @@ EQF.permu <- function(LOD.QTLdetect.result, ptime = 1000, alpha = 0.05, Q = TRUE
 
   maxeqf <- 1
   add.group <- c()
-  if(console){
-    cat("cluster group", "\n")
-  }
+  cat("cluster group \n"[console])
   while(class(clu.eqf)[[1]] == "matrix"){
     peqf <- c()
     clu.eqf1 <- apply(clu.eqf, 2, sum)
@@ -138,15 +136,11 @@ EQF.permu <- function(LOD.QTLdetect.result, ptime = 1000, alpha = 0.05, Q = TRUE
     clu.det <- clu.det[-group,]
     clu.eqf <- clu.eqf[-group,]
     if(maxeqf%%10 == 0){
-      if(console){
-        cat(maxeqf, "\n")
-      }
+      cat(paste(maxeqf, "\n")[console])
     }
     maxeqf <- maxeqf+1
   }
-  if(console){
-    cat(maxeqf, "\n")
-  }
+  cat(paste(maxeqf, "\n")[console])
 
   cluster[[maxeqf]] <- qtlind[!qtlind %in% add.group]
   Lagend <- c()
@@ -167,12 +161,11 @@ EQF.permu <- function(LOD.QTLdetect.result, ptime = 1000, alpha = 0.05, Q = TRUE
 
   eqf.premutation <- function(eqfmatrix, ptime = ptime, console = console){
     t0 <- Sys.time()
-    if(console){
-      cat("permutation time", "\n")
-    }
+    cat("permutation time \n"[console])
     n <- ncol(eqfmatrix)
     g <- nrow(eqfmatrix)
     out <- matrix(0, ptime, n)
+
     for(i in 1:ptime){
       p.matrix <- matrix(0, g, n)
       for(j in 1:g){
@@ -181,19 +174,17 @@ EQF.permu <- function(LOD.QTLdetect.result, ptime = 1000, alpha = 0.05, Q = TRUE
         p.matrix[j, k] <- eqfpos
       }
       out[i,] <- sort(apply(p.matrix, 2, sum), decreasing = TRUE)
-      if(console){
-        if(Sys.time()-t0 > 5 | i == ptime){
-          cat(paste(i, ptime, sep = "/"), "\n", sep = "\t")
-          t0 <- Sys.time()
-        }
+      cat1 <- paste(paste(i, ptime, sep = "/"), "\n", sep = "\t")
+      if(Sys.time()-t0 > 5){
+        cat(cat1[console])
+        t0 <- Sys.time()
       }
     }
+    cat(paste(paste(ptime, ptime, sep = "/"), "\n", sep = "\t")[console])
     return(out)
   }
 
-  if(console){
-    cat("cluster group permutation", "\n")
-  }
+  cat("cluster group permutation \n"[console])
   permu.clu <- eqf.premutation(clumatrix, ptime, console)
 
   sortEQF <- function(x, a = ceiling(ptime*alpha)){
@@ -211,9 +202,7 @@ EQF.permu <- function(LOD.QTLdetect.result, ptime = 1000, alpha = 0.05, Q = TRUE
 
   permu.q <- NULL
   if(Q){
-    if(console){
-      cat("Q-method permutation", "\n")
-    }
+    cat("Q-method permutation \n"[console])
     q0 <- EQF[apply(EQF, 1, sum) > 0,]
     permu.q <- eqf.premutation(q0, ptime, console)
     thre.q <- apply(permu.q, 2, sortEQF)

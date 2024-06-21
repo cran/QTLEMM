@@ -13,8 +13,8 @@ Missing values should be denoted as NA in the matrix.}
 
 \item{bin}{matrix. An n*2 matrix that represents the number of bins on
 each chromosome, where n is the number of chromosomes. The first column
-denotes the chromosome number, and the second column denotes how many
-bins are on that chromosome. It's important to ensure that chromosomes
+denotes the chromosome number, and the second column denotes the number
+of bins on that chromosome. It's important to ensure that chromosomes
 are divided in order.}
 
 \item{thre}{numeric. The LOD threshold. Any LOD score under this

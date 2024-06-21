@@ -24,6 +24,7 @@
 #' @seealso
 #' \code{\link[QTLEMM]{LOD.QTLdetect}}
 #' \code{\link[QTLEMM]{EQF.permu}}
+#' \code{\link[QTLEMM]{Qhot.EQF}}
 #'
 #' @examples
 #' # load the example data

@@ -7,8 +7,8 @@
 #' Missing values should be denoted as NA in the matrix.
 #' @param bin matrix. An n*2 matrix that represents the number of bins on
 #' each chromosome, where n is the number of chromosomes. The first column
-#' denotes the chromosome number, and the second column denotes how many
-#' bins are on that chromosome. It's important to ensure that chromosomes
+#' denotes the chromosome number, and the second column denotes the number
+#' of bins on that chromosome. It's important to ensure that chromosomes
 #' are divided in order.
 #' @param thre numeric. The LOD threshold. Any LOD score under this
 #' threshold will be calculated as 0.
@@ -101,14 +101,13 @@ LOD.QTLdetect <- function(LOD, bin, thre = 3, QTLdist = 20, console = TRUE){
   LOD[LOD < thre] <- 0
 
   det <- matrix(0, nt, ns)
-  if(console){cat("step", "\t", "process", "\n")}
+  cat("step\tprocess \n"[console])
   t0 <- Sys.time()
   for(j in 1:nt){
-    if(console){
-      if(Sys.time()-t0 > 1 | j == nt){
-        cat("detect", paste(j, nt, sep = "/"), "\n", sep = "\t")
-        t0 <- Sys.time()
-      }
+    cat1 <- paste("detect", paste(j, nt, sep = "/"), "\n", sep = "\t")
+    if(Sys.time()-t0 > 1){
+      cat(cat1[console])
+      t0 <- Sys.time()
     }
 
     k1 <- c()
@@ -147,19 +146,19 @@ LOD.QTLdetect <- function(LOD, bin, thre = 3, QTLdist = 20, console = TRUE){
     }
     det[j,] <- k1
   }
+  cat(cat1[console])
 
   summ <- function(x){sum(x, na.rm = TRUE)}
   qtldetect <- apply(det, 1, summ)
 
   link <- matrix(0, nt, nc)
-  if(console){cat("step", "\t", "process", "\n")}
+  cat("step\tprocess \n"[console])
   t0 <- Sys.time()
   for(j in 1:nt){
-    if(console){
-      if(Sys.time()-t0 > 1 | j == nt){
-        cat("linkage", paste(j, nt, sep = "/"), "\n", sep = "\t")
-        t0 <- Sys.time()
-      }
+    cat1 <- paste("linkage", paste(j, nt, sep = "/"), "\n", sep = "\t")
+    if(Sys.time()-t0 > 1){
+      cat(cat1[console])
+      t0 <- Sys.time()
     }
     for(i in 1:nc){
       x <- det[j, cr0 == i]
@@ -167,16 +166,16 @@ LOD.QTLdetect <- function(LOD, bin, thre = 3, QTLdist = 20, console = TRUE){
       if(length(a) == 2){link[j, i] <- a[2]}
     }
   }
+  cat(cat1[console])
   link <- table(link)
 
   EQF <- matrix(0, nt, ns)
   t0 <- Sys.time()
   for(i in 1:nt){
-    if(console){
-      if(Sys.time()-t0 > 1 | i == nt){
-        cat("EQF caculating", paste(i, nt, sep = "/"), "\n", sep = "\t")
-        t0 <- Sys.time()
-      }
+    cat1 <- paste("EQF caculating", paste(i, nt, sep = "/"), "\n", sep = "\t")
+    if(Sys.time()-t0 > 1){
+      cat(cat1[console])
+      t0 <- Sys.time()
     }
     QTL <- det[i,]
     if(!1 %in% QTL){next}
@@ -215,6 +214,7 @@ LOD.QTLdetect <- function(LOD, bin, thre = 3, QTLdist = 20, console = TRUE){
     }
     EQF[i,] <- ka
   }
+  cat(cat1[console])
 
   EQF.all <- apply(EQF, 2, sum)
 

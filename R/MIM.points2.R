@@ -257,7 +257,7 @@ MIM.points2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
   }
 
   name0 <- cbind(paste("QTL", 1:nq, ".ch", sep = ""), paste("QTL", 1:nq, ".cM", sep = ""))
-  if(console){cat("#", t(name0), "LRT", "log.likelihood", "\n", sep = "\t")}
+  cat(paste("#", paste(t(name0), collapse = "\t"), "LRT", "log.likelihood", "\n", sep = "\t")[console])
 
   if(method == "EM"){
     meth <- function(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, crit){
@@ -471,7 +471,7 @@ MIM.points2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
 
     LRT <- round(effect0[length(effect0)-2], 3)
     like <- round(effect0[length(effect0)-1], 3)
-    if(console){cat(paste(i, "/", nrow(sm), sep = ""), t(QTL0), LRT, like, "\n", sep = "\t")}
+    cat(paste(paste(i, "/", nrow(sm), sep = ""), paste(t(QTL0), collapse = "\t"), LRT, like, "\n", sep = "\t")[console])
     effect[i,] <- effect0
   }
   colnames(effect) <-  c(t(name0), colnames(D.matrix), "LRT", "log.likelihood", "R2")

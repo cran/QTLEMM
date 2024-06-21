@@ -232,7 +232,7 @@ MIM.search2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
     D.matrix <- D.make(as.numeric(nq), type = type)
   }
 
-  if(console){cat("chr", "cM", "LRT", "log.likelihood", "known QTL", "\n", sep = "\t")}
+  cat(paste("chr", "cM", "LRT", "log.likelihood", "known QTL", "\n", sep = "\t")[console])
 
   if(method == "EM"){
     meth <- function(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, crit){
@@ -441,7 +441,7 @@ MIM.search2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
   name0 <- rbind(name0, c("new.ch", "new.cM"))
   knownQTL <- c()
   for(i in 1:(nq-1)){
-    knownQTL <- c(knownQTL, paste("[", QTL[i, 1], ",", QTL[i, 2], "]", sep = ""))
+    knownQTL <- c(paste(knownQTL, " [", QTL[i, 1], ",", QTL[i, 2], "]", sep = ""))
   }
 
   effect <- c()
@@ -473,7 +473,7 @@ MIM.search2 <- function(QTL, marker, geno, y, yu = NULL, sele.g = "n", tL = NULL
 
       LRT0 <- round(effect0[length(effect0)-2], 3)
       like <- round(effect0[length(effect0)-1], 5)
-      if(console){cat(i, j, LRT0, like, knownQTL, "\n", sep = "\t")}
+      cat(paste(i, j, LRT0, like, knownQTL, "\n", sep = "\t")[console])
       effect <- rbind(effect, effect0)
     }
     model <- fit0[[7]]

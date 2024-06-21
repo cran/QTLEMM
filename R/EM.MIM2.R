@@ -314,9 +314,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       L1 <- sum(log(rowSums(Lih1)))
       number <- 1
 
-      if(console){
-        cat("number", "var", effectname, "\n", sep = "\t")
-      }
+      cat(paste("number", "var", effectname, "\n", sep = "\t")[console])
       while(max(abs(c(Et1-Et,sigt1-sigt))) >= crit & number < stop){
         repeat{
           mut <- mut1
@@ -358,11 +356,9 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
           L1 <- sum(log(rowSums(Lih1)))
           break(max(abs(c(Et1-Et,sigt1-sigt))) < crit)
         }
-        if(console){
-          Ep <- round(Et1, 3)
-          sp <- round(sigt1, 3)
-          cat(number, sp, Ep, "\n", sep = "\t")
-        }
+        Ep <- round(Et1, 3)
+        sp <- round(sigt1, 3)
+        cat(paste(number, sp, Ep, "\n", sep = "\t")[console])
         number <- number+1
 
         if(NaN %in% (Et1-Et)){
@@ -669,9 +665,7 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
       Mt <- c()
       St <- c()
 
-      if(console){
-        cat("number", "var", effectname, "\n", sep = "\t")
-      }
+      cat(paste("number", "var", effectname, "\n", sep = "\t")[console])
       for (iter in 1:maxit) {
         E0 <- E
         sigma0 <- sigma
@@ -702,11 +696,9 @@ EM.MIM2 <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, yu = NULL,
         LL1 <- sum(log(rowSums(Freq*stats::dnorm(ys, mu, sigma)/U)))
         err <- abs(LL1 - LL)
         LL <- LL1
-        if(console){
-          Ep <- round(E, 3)
-          sp <- round(sigma^2, 3)
-          cat(iter, sp, Ep, "\n", sep = "\t")
-        }
+        Ep <- round(E, 3)
+        sp <- round(sigma^2, 3)
+        cat(paste(iter, sp, Ep, "\n", sep = "\t")[console])
 
         Et[iter,] <- E
         Mt[iter] <- mu0

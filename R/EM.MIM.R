@@ -154,9 +154,7 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
     effectname <- colnames(D.matrix)
   }
 
-  if(console){
-    cat("number", "var", effectname, "\n", sep = "\t")
-  }
+  cat(paste("number", "var", effectname, "\n", sep = "\t")[console])
 
   Yt <- as.matrix(Y)
   indvec <- matrix(1, 1, ind)
@@ -205,11 +203,9 @@ EM.MIM <- function(D.matrix, cp.matrix, y, E.vector0 = NULL, X = NULL, beta0 = N
       break()
     }
     number <- number+1
-    if(console){
-      Ep <- round(c(E.t), 3)
-      sp <- round(c(sigma.t)^2, 3)
-      cat(number, sp, Ep, "\n", sep = "\t")
-    }
+    Ep <- round(c(E.t), 3)
+    sp <- round(c(sigma.t)^2, 3)
+    cat(paste(number, sp, Ep, "\n", sep = "\t")[console])
 
     E.vector <- c(E.t)
     beta <- c(beta.t)

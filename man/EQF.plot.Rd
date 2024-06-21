@@ -38,4 +38,5 @@ for QTL Hotspot Detection. G3: Genes, Genomes, Genetics: jkab056. <doi: 10.1093/
 \seealso{
 \code{\link[QTLEMM]{LOD.QTLdetect}}
 \code{\link[QTLEMM]{EQF.permu}}
+\code{\link[QTLEMM]{Qhot.EQF}}
 }

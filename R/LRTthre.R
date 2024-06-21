@@ -337,12 +337,11 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
                  y[i, 4, j-1]-sqrt(nS*bcp2M(d[j], nG)[3])*y[i, 3, j])
           }
         }
-        if(console){
-          if(i%%cs == 0 | i == simu){
-            cat(paste("BC", nG, "\t"), cr, i, "\n", sep = "\t")
-          }
+        if(i%%cs == 0){
+          cat(paste(paste("BC", nG, "\t"), cr, i, "\n", sep = "\t")[console])
         }
       }
+      cat(paste(paste("BC", nG, "\t"), cr, i, "\n", sep = "\t")[console])
 
       Ds <- seq(0, D, speed)
       Dsc0 <- cumsum(d)
@@ -1026,13 +1025,12 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
           y <- matrix(rawy[j, ], nrow = 9)
         }
         TS[j] <- ZR(y, d, nS, ss, nG, speed)
-        if(console){
-          if(j%%cs == 0 | j == simu){
-            cat(paste("RI F", nG, " ad   ", sep = ""), cr, j, "\n", sep = "\t")
-          }
+        if(j%%cs == 0){
+          cat(paste(paste("RI F", nG, " ad   ", sep = ""), cr, j, "\n", sep = "\t")[console])
         }
       }
       return(TS)
+      cat(paste(paste("RI F", nG, " ad   ", sep = ""), cr, j, "\n", sep = "\t")[console])
     }
 
     if(!d.eff){
@@ -1088,7 +1086,7 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
         TS <- rep(0, simu)
 
 
-        for (j in 1:simu) {
+        for (j in 1:simu){
           if(length(d) > 1){
             y <- matrix(rep(1, (9*length(d))), nrow = 9)
             y[, 1] <- rawy[j, 1:9]
@@ -1108,12 +1106,11 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
             y <- matrix(rawy[j, ], nrow = 9)
           }
           TS[j] <- U.RI(y, d, nS, ss, nG, speed)
-          if(console){
-            if(j%%cs == 0 | j == simu){
-              cat(paste("RI F", nG, " a   ", sep = ""), cr, j, "\n", sep = "\t")
-            }
+          if(j%%cs == 0){
+            cat(paste(paste("RI F", nG, " a   ", sep = ""), cr, j, "\n", sep = "\t")[console])
           }
         }
+        cat(paste(paste("RI F", nG, " a   ", sep = ""), cr, j, "\n", sep = "\t")[console])
         return(TS)
       }
     }
@@ -1473,12 +1470,11 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
           y <- matrix(rawy[j, ], nrow = 9)
         }
         TS[j] <- ZA(y, d, nS, ss, nG, speed)
-        if(console){
-          if(j%%cs == 0 | j == simu){
-            cat(paste("AI F", nG, " ad   ", sep = ""), cr, j, "\n", sep = "\t")
-          }
+        if(j%%cs == 0){
+          cat(paste(paste("AI F", nG, " ad   ", sep = ""), cr, j, "\n", sep = "\t")[console])
         }
       }
+      cat(paste(paste("AI F", nG, " ad   ", sep = ""), cr, j, "\n", sep = "\t")[console])
       return(TS)
     }
 
@@ -1555,20 +1551,17 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
             y <- matrix(rawy[j, ], nrow = 9)
           }
           TS[j] <- U.AI(y, d, nS, ss, nG, speed)
-          if(console){
-            if(j%%cs == 0 | j == simu){
-              cat(paste("AI F", nG, " a   ", sep = ""), cr, j, "\n", sep = "\t")
-            }
+          if(j%%cs == 0){
+            cat(paste(paste("AI F", nG, " a   ", sep = ""), cr, j, "\n", sep = "\t")[console])
           }
         }
+        cat(paste(paste("AI F", nG, " a   ", sep = ""), cr, j, "\n", sep = "\t")[console])
         return(TS)
       }
     }
   }
 
-  if(console){
-    cat("Generation", "chr", "simulation times", "\n", sep = "\t")
-  }
+  cat(paste("Generation", "chr", "simulation times", "\n", sep = "\t")[console])
   for(i in 1:ncr){
     d <- marker[marker[, 1] == cr[i], 2]
     d <- d[-1]-d[-length(d)]

@@ -227,7 +227,7 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
     }
   }
 
-  if(console){cat("chr", "cM", "LRT", "\n", sep = "\t")}
+  cat(paste("chr", "cM", "LRT", "\n", sep = "\t")[console])
   effect <- c()
   cr0 <- unique(marker[, 1])
   for(i in cr0){
@@ -261,7 +261,7 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
 
       eff0 <- c(i, j, eff, LRT, R2)
       effect <- rbind(effect, eff0)
-      if(console){cat(i, j, LRT, "\n", sep = "\t")}
+      cat(paste(i, j, LRT, "\n", sep = "\t")[console])
     }
   }
   row.names(effect) <- 1:nrow(effect)
@@ -271,6 +271,7 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
 
   LRT.threshold <- NULL
   if(LRT.thre == TRUE){
+    cat("LRT threshold calculation \n"[console])
     LRT.threshold <- LRTthre(marker, type = type, ng = ng, ns = length(y), gv = 25,
                              cM = cM, d.eff = d.eff, simu = simu, speed = speed,
                              alpha = alpha, console = console)

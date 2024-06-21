@@ -21,7 +21,7 @@ LOD.QTLdetect().}
 \item{alpha}{numeric. The type 1 error rate of detecting the hotspot.}
 
 \item{Q}{logical. When set to TRUE, the function will additionally carry
-out the population of the Q method as the control group, which will be
+out the permutation of the Q method as the control group, which will be
 indicated as 'B' in the output.}
 
 \item{console}{logical. Determines whether the process of the algorithm
@@ -33,7 +33,7 @@ will be displayed in the R console or not.}
 \item{LOD.threshold}{The LOD threshold used in this analysis.}
 \item{cluster.number}{The number of QTLs in each cluster group.}
 \item{cluster.id}{The serial number of traits in each cluster group.}
-\item{cluster.matrix}{The new EQF matrix from the clustering process.}
+\item{cluster.matrix}{The new EQF matrix after the clustering process.}
 \item{permu.matrix.cluster}{The permutation result of the clustering
 method, which has been sorted by order.}
 \item{permu.matrix.Q}{The permutation result of the Q method, which has

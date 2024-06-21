@@ -64,7 +64,6 @@ Qhot <- function(DataQTL, DataCrop, ScanStep = 1, NH = 100, NP = 1000, save.pdf 
     DataQTL[, 1] <- 1:nrow(DataQTL)
   }
 
-
   DataCrop <- data.frame(DataCrop)
   if(ncol(DataCrop) != 3 | TRUE %in% is.na(DataCrop)){
     stop("Input data DataCrop error, please check and fix.", call. = FALSE)
