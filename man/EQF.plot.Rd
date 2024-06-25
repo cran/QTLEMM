@@ -4,17 +4,21 @@
 \alias{EQF.plot}
 \title{EQF plot}
 \usage{
-EQF.plot(result, plot.all = TRUE, plot.chr = TRUE)
+EQF.plot(result, plot.all = TRUE, plot.chr = TRUE, plot.main = TRUE)
 }
 \arguments{
-\item{result}{list. The data list of the output from LOD.QTLdetect()
-or EQF.permu().}
+\item{result}{list. The data list of the output from LOD.QTLdetect(),
+EQF.permu(), or Qhot.EQF().}
 
 \item{plot.all}{logical. When set to TRUE, it directs the function to
 output one figure of the EQF values over the bins.}
 
 \item{plot.chr}{logical. When set to TRUE, it instructs the function to
 output the figures of the EQF values over the bins for each chromosome.}
+
+\item{plot.main}{logical of character. When set to TRUE, it will use the
+default title on the plot. When set to FALSE, it will be no title on the
+plot. Users can also use this argument to set their own title.}
 }
 \value{
 One or several EQF plots.

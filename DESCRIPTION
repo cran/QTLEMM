@@ -1,7 +1,7 @@
 Package: QTLEMM
 Type: Package
 Title: QTL Mapping and Hotspots Detection
-Version: 2.0.0
+Version: 2.1.0
 Authors@R: c(
     person("Ping-Yuan", "Chung", email = "pychung@webmail.stat.sinica.edu.tw", role = "cre"),
     person("Chen-Hung", "Kao", email = "chkao@webmail.stat.sinica.edu.tw", role = "aut"),
@@ -43,7 +43,7 @@ License: GPL-2
 Encoding: UTF-8
 RoxygenNote: 7.3.1
 NeedsCompilation: no
-Packaged: 2024-06-21 09:30:00 UTC; pingyuan
+Packaged: 2024-06-24 10:05:52 UTC; pingyuan
 Author: Ping-Yuan Chung [cre],
   Chen-Hung Kao [aut],
   Y.-T. Guo [aut],
@@ -54,4 +54,4 @@ Author: Ping-Yuan Chung [cre],
   M.-H. Zeng [aut]
 Maintainer: Ping-Yuan Chung <pychung@webmail.stat.sinica.edu.tw>
 Repository: CRAN
-Date/Publication: 2024-06-21 09:50:06 UTC
+Date/Publication: 2024-06-25 09:00:06 UTC
