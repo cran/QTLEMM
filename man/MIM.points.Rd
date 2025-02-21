@@ -5,10 +5,14 @@
 \title{QTL Short Distance Correction by MIM}
 \usage{
 MIM.points(
-  QTL,
-  marker,
-  geno,
-  y,
+  QTL = NULL,
+  marker = NULL,
+  geno = NULL,
+  y = NULL,
+  yu = NULL,
+  sele.g = "n",
+  tL = NULL,
+  tR = NULL,
   method = "EM",
   type = "RI",
   D.matrix = NULL,
@@ -17,7 +21,9 @@ MIM.points(
   scope = 5,
   speed = 1,
   crit = 10^-3,
-  console = TRUE
+  console = TRUE,
+  IMresult = NULL,
+  MIMresult = NULL
 )
 }
 \arguments{
@@ -39,8 +45,31 @@ for n individuals. The marker genotypes of P1 homozygote (MM),
 heterozygote (Mm), and P2 homozygote (mm) are coded as 2, 1, and 0,
 respectively, with NA indicating missing values.}
 
-\item{y}{vector. A vector with n elements that contains the phenotype
-values of individuals.}
+\item{y}{vector. A vector that contains the phenotype values of
+individuals with genotypes.}
+
+\item{yu}{vector. A vector that contains the phenotype values of
+individuals without genotypes.}
+
+\item{sele.g}{character. Determines the type of data being analyzed:
+If sele.g="n", it considers the data as complete genotyping data. If
+sele.g="f", it treats the data as selective genotyping data and utilizes
+the proposed corrected frequency model (Lee 2014) for analysis; If
+sele.g="t", it considers the data as selective genotyping data and uses
+the truncated model (Lee 2014) for analysis; If sele.g="p", it treats
+the data as selective genotyping data and uses the population
+frequency-based model (Lee 2014) for analysis. Note that the 'yu'
+argument must be provided when sele.g="f" or "p".}
+
+\item{tL}{numeric. The lower truncation point of phenotype value when
+sele.g="t". When sele.g="t" and tL=NULL, the 'yu' argument must be
+provided. In this case, the function will consider the minimum of 'yu'
+as the lower truncation point.}
+
+\item{tR}{numeric. The upper truncation point of phenotype value when
+sele.g="t". When sele.g="t" and tR=NULL, the 'yu' argument must be
+provided. In this case, the function will consider the maximum of 'yu'
+as the upper truncation point.}
 
 \item{method}{character. When method="EM", it indicates that the interval
 mapping method by Lander and Botstein (1989) is used in the analysis.
@@ -79,19 +108,32 @@ It must be a value between 0 and 1.}
 
 \item{console}{logical. Determines whether the process of the algorithm
 will be displayed in the R console or not.}
+
+\item{IMresult}{list. The data list of the output from IM.search(). The
+required parameters for this function will be extracted from the data list.}
+
+\item{MIMresult}{list. The data list of the output from MIM.search() or
+MIM.points(). The required parameters for this function will be extracted
+from the data list.}
 }
 \value{
-\item{effect}{The estimated effects, log-likelihood value, and LRT
+\item{effect}{The estimated effects, log likelihood value, and LRT
 statistics of all searched positions.}
 \item{QTL.best}{The positions of the best QTL combination.}
 \item{effect.best}{The estimated effects and LRT statistics of the best
 QTL combination.}
+\item{model}{The model of selective genotyping data in this analysis.}
+\item{inputdata}{The input data of this analysis. It contains marker, geno,
+y, yu, sele.g, type, ng, cM, and D.matrix. The parameters not provided by
+the user will be output with default values.}
 }
 \description{
 Expectation-maximization algorithm for QTL multiple interval mapping to
-find the best QTL position near the designated QTL position.
+find the best QTL position near the designated QTL position. It can handle
+genotype data which is selective genotyping too.
 }
 \examples{
+
 # load the example data
 load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
 
@@ -99,6 +141,24 @@ load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
 result <- MIM.points(QTL, marker, geno, y, type = "RI", ng = 2, scope = c(0,1,2), speed = 2)
 result$QTL.best
 result$effect.best
+
+\dontrun{
+# Example for selective genotyping data
+# load the example data
+load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
+
+# make the seletive genotyping data
+ys <- y[y > quantile(y)[4] | y < quantile(y)[2]]
+yu <- y[y >= quantile(y)[2] & y <= quantile(y)[4]]
+geno.s <- geno[y > quantile(y)[4] | y < quantile(y)[2],]
+
+# run and result
+result <- MIM.points(QTL, marker, geno.s, ys, yu, sele.g = "f",
+ type = "RI", ng = 2, scope = c(0,1,2), speed = 2)
+result$QTL.best
+result$effect.best
+}
+
 }
 \references{
 KAO, C.-H. and Z.-B. ZENG 1997 General formulas for obtaining the maximum
@@ -107,8 +167,12 @@ mapping when using the EM algorithm. Biometrics 53, 653-665. <doi: 10.2307/25339
 
 KAO, C.-H., Z.-B. ZENG and R. D. TEASDALE 1999 Multiple interval mapping
 for Quantitative Trait Loci. Genetics 152: 1203-1216. <doi: 10.1093/genetics/152.3.1203>
+
+H.-I LEE, H.-A. HO and C.-H. KAO 2014 A new simple method for improving
+QTL mapping under selective genotyping. Genetics 198: 1685-1698. <doi: 10.1534/genetics.114.168385.>
 }
 \seealso{
 \code{\link[QTLEMM]{EM.MIM}}
-\code{\link[QTLEMM]{MIM.points2}}
+\code{\link[QTLEMM]{IM.search}}
+\code{\link[QTLEMM]{MIM.search}}
 }

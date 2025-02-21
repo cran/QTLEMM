@@ -1,7 +1,8 @@
 #' QTL search by MIM
 #'
 #' Expectation-maximization algorithm for QTL multiple interval mapping to
-#' find one more QTL in the presence of some known QTLs.
+#' find one more QTL in the presence of some known QTLs. It can handle
+#' genotype data which is selective genotyping too.
 #'
 #' @param QTL matrix. A q*2 matrix contains the QTL information, where the
 #' row dimension 'q' represents the number of QTLs in the chromosomes. The
@@ -18,8 +19,27 @@
 #' for n individuals. The marker genotypes of P1 homozygote (MM),
 #' heterozygote (Mm), and P2 homozygote (mm) are coded as 2, 1, and 0,
 #' respectively, with NA indicating missing values.
-#' @param y vector. A vector with n elements that contains the phenotype
-#' values of individuals.
+#' @param y vector. A vector that contains the phenotype values of
+#' individuals with genotypes.
+#' @param yu vector. A vector that contains the phenotype values of
+#' individuals without genotypes.
+#' @param sele.g character. Determines the type of data being analyzed:
+#' If sele.g="n", it considers the data as complete genotyping data. If
+#' sele.g="f", it treats the data as selective genotyping data and utilizes
+#' the proposed corrected frequency model (Lee 2014) for analysis; If
+#' sele.g="t", it considers the data as selective genotyping data and uses
+#' the truncated model (Lee 2014) for analysis; If sele.g="p", it treats
+#' the data as selective genotyping data and uses the population
+#' frequency-based model (Lee 2014) for analysis. Note that the 'yu'
+#' argument must be provided when sele.g="f" or "p".
+#' @param tL numeric. The lower truncation point of phenotype value when
+#' sele.g="t". When sele.g="t" and tL=NULL, the 'yu' argument must be
+#' provided. In this case, the function will consider the minimum of 'yu'
+#' as the lower truncation point.
+#' @param tR numeric. The upper truncation point of phenotype value when
+#' sele.g="t". When sele.g="t" and tR=NULL, the 'yu' argument must be
+#' provided. In this case, the function will consider the maximum of 'yu'
+#' as the upper truncation point.
 #' @param method character. When method="EM", it indicates that the interval
 #' mapping method by Lander and Botstein (1989) is used in the analysis.
 #' Conversely, when method="REG", it indicates that the approximate regression
@@ -50,6 +70,11 @@
 #' It must be a value between 0 and 1.
 #' @param console logical. Determines whether the process of the algorithm
 #' will be displayed in the R console or not.
+#' @param IMresult list. The data list of the output from IM.search(). The
+#' required parameters for this function will be extracted from the data list.
+#' @param MIMresult list. The data list of the output from MIM.search() or
+#' MIM.points(). The required parameters for this function will be extracted
+#' from the data list.
 #'
 #' @return
 #' \item{effect}{The estimated effects, log-likelihood value, and LRT
@@ -57,6 +82,10 @@
 #' \item{QTL.best}{The positions of the best QTL combination.}
 #' \item{effect.best}{The estimated effects and LRT statistics of the best
 #' QTL combination.}
+#' \item{model}{The model of selective genotyping data in this analyze.}
+#' \item{inputdata}{The input data of this analysis. It contains marker, geno,
+#' y, yu, sele.g, type, ng, cM, and D.matrix. The parameters not provided by
+#' the user will be output with default values.}
 #'
 #' @export
 #'
@@ -69,11 +98,16 @@
 #' KAO, C.-H., Z.-B. ZENG and R. D. TEASDALE 1999 Multiple interval mapping
 #' for Quantitative Trait Loci. Genetics 152: 1203-1216. <doi: 10.1093/genetics/152.3.1203>
 #'
+#' H.-I LEE, H.-A. HO and C.-H. KAO 2014 A new simple method for improving
+#' QTL mapping under selective genotyping. Genetics 198: 1685-1698. <doi: 10.1534/genetics.114.168385.>
+#'
 #' @seealso
 #' \code{\link[QTLEMM]{EM.MIM}}
-#' \code{\link[QTLEMM]{MIM.search2}}
+#' \code{\link[QTLEMM]{IM.search}}
+#' \code{\link[QTLEMM]{MIM.points}}
 #'
 #' @examples
+#'
 #' # load the example data
 #' load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
 #'
@@ -82,11 +116,92 @@
 #' result <- MIM.search(QTL, marker, geno, y, type = "RI", ng = 2, speed = 15, QTLdist = 50)
 #' result$QTL.best
 #' result$effect.best
-MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matrix = NULL, ng = 2, cM = TRUE,
-                       speed = 1, QTLdist = 15, link = TRUE, crit = 10^-3, console = TRUE){
+#'
+#' \dontrun{
+#' # Example for selective genotyping data
+#' # load the example data
+#' load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
+#'
+#' # make the seletive genotyping data
+#' ys <- y[y > quantile(y)[4] | y < quantile(y)[2]]
+#' yu <- y[y >= quantile(y)[2] & y <= quantile(y)[4]]
+#' geno.s <- geno[y > quantile(y)[4] | y < quantile(y)[2],]
+#'
+#' # run and result
+#' QTL <- c(1, 23)
+#' result <- MIM.search(QTL, marker, geno.s, ys, yu, sele.g = "f",
+#'  type = "RI", ng = 2, speed = 15, QTLdist = 50)
+#' result$QTL.best
+#' result$effect.best
+#' }
+#'
+MIM.search <- function(QTL = NULL, marker = NULL, geno = NULL, y = NULL, yu = NULL, sele.g = "n", tL = NULL,
+                       tR = NULL, method = "EM", type = "RI", D.matrix = NULL, ng = 2, cM = TRUE, speed = 1,
+                       QTLdist = 15, link = TRUE, crit = 10^-3, console = TRUE, IMresult = NULL, MIMresult = NULL){
 
-  if(is.null(QTL) | is.null(marker) | is.null(geno) |  is.null(y)){
-    stop("Input data is missing, please cheak and fix.", call. = FALSE)
+  if(!is.null(IMresult)){
+    check1 <- names(IMresult) == c("effect", "LRT.threshold", "detect.QTL", "model", "inputdata")
+    if(!is.list(IMresult) | sum(check1) != 5){
+      stop("IMresult data error, please input all of the original output data of IM.search().", call. = FALSE)
+    } else {
+      check2 <- names(IMresult$inputdata) == c("marker", "geno", "y", "yu", "sele.g", "type", "ng", "cM", "d.eff" )
+      if(!is.list(IMresult$inputdata) | sum(check2) != 9){
+        stop("IMresult data error, please input all of the original output data of IM.search().", call. = FALSE)
+      } else {
+        if(is.data.frame(IMresult$detect.QTL) | is.matrix(IMresult$detect.QTL)){
+          QTL <- as.matrix(IMresult$detect.QTL[,1:2])
+        } else {stop("IMresult data error, please input all of the original output data of IM.search().", call. = FALSE)}
+        marker <- IMresult$inputdata$marker
+        geno <- IMresult$inputdata$geno
+        y <- IMresult$inputdata$y
+        yu <- IMresult$inputdata$yu
+        sele.g <- IMresult$inputdata$sele.g
+        type <- IMresult$inputdata$type
+        ng <- IMresult$inputdata$ng
+        cM <- IMresult$inputdata$cM
+        if(is.null(D.matrix)){
+          D.matrix <- D.make(nrow(QTL)+1, type = type)
+          if(length(IMresult$inputdata$d.eff) != 0){
+            if(IMresult$inputdata$d.eff[1] == 0){
+              D.matrix <- D.make(nrow(QTL)+1, type = type, d = 0)
+            }
+          }
+        }
+        cat("Use the output data of IM.search() for analysis. \n")
+        cat("If an error occurs, please check whether the original output data of IM.search() is used. \n")
+      }
+    }
+  } else if(!is.null(MIMresult)){
+    check1 <- names(MIMresult) == c("effect", "QTL.best", "effect.best", "model", "inputdata")
+    if(!is.list(MIMresult) | sum(check1) != 5){
+      stop("MIMresult data error, please input all of the original output data of MIM.search()/MIM.points().", call. = FALSE)
+    } else {
+      check2 <- names(MIMresult$inputdata) == c("marker", "geno", "y", "yu", "sele.g", "type", "ng", "cM", "D.matrix" )
+      if(!is.list(MIMresult$inputdata) | sum(check2) != 9){
+        stop("MIMresult data error, please input all of the original output data of MIM.search()/MIM.points().", call. = FALSE)
+      } else {
+        if(is.data.frame(MIMresult$QTL.best) | is.matrix(MIMresult$QTL.best)){
+          QTL <- as.matrix(MIMresult$QTL.best[,1:2])
+        } else {stop("MIMresult data error, please input all of the original output data of MIM.search()/MIM.points().", call. = FALSE)}
+        marker <- MIMresult$inputdata$marker
+        geno <- MIMresult$inputdata$geno
+        y <- MIMresult$inputdata$y
+        yu <- MIMresult$inputdata$yu
+        sele.g <- MIMresult$inputdata$sele.g
+        type <- MIMresult$inputdata$type
+        ng <- MIMresult$inputdata$ng
+        cM <- MIMresult$inputdata$cM
+        if(is.null(D.matrix)){
+          D.matrix <- D.make(nrow(QTL)+1, type = type)
+        }
+        cat("Use the output data of MIM.search()/MIM.points() for analysis. \n")
+        cat("If an error occurs, please check whether the original output data of MIM.search()/MIM.points() is used. \n")
+      }
+    }
+  }
+
+  if(is.null(QTL) | is.null(marker) | is.null(geno) | is.null(y)){
+    stop("Input data is missing. The argument QTL, marker, geno, and y must be input.", call. = FALSE)
   }
 
   genotest <- table(c(geno))
@@ -99,7 +214,7 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
   markertest <- c(ncol(marker) != 2, NA %in% marker, marker[,1] != sort(marker[,1]), nrow(marker) != ncol(geno))
   datatry <- try(marker*marker, silent=TRUE)
   if(class(datatry)[1] == "try-error" | TRUE %in% markertest){
-    stop("Marker data error, or the number of marker does not match the genetype data.", call. = FALSE)
+    stop("Marker data error, or the number of marker does not match the genotype data.", call. = FALSE)
   }
 
   QTL <- as.matrix(QTL)
@@ -125,6 +240,32 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
   datatry <- try(y%*%geno, silent=TRUE)
   if(class(datatry)[1] == "try-error"){
     stop("Phenotype data error, or the number of individual does not match the genetype data.", call. = FALSE)
+  }
+
+  if(!is.null(yu)){
+    yu <- yu[!is.na(yu)]
+    datatry <- try(yu%*%yu, silent=TRUE)
+    if(class(datatry)[1] == "try-error"){
+      stop("yu data error, please check your yu data.", call. = FALSE)
+    }
+  }
+
+  if(!sele.g[1] %in% c("n", "t", "p", "f") | length(sele.g)!=1){
+    stop("Parameter sele.g error, please check and fix.", call. = FALSE)
+  }
+
+  if(sele.g == "t"){
+    lrtest <- c(tL[1] < min(c(y,yu)), tR[1] > max(c(y,yu)), tR[1] < tL[1],
+                length(tL) > 1, length(tR) > 1)
+    datatry <- try(tL[1]*tR[1], silent=TRUE)
+    if(class(datatry)[1] == "try-error" | TRUE %in% lrtest){
+      stop("Parameter tL or tR error, please check and fix.", call. = FALSE)
+    }
+    if(is.null(tL) | is.null(tR)){
+      if(is.null(yu)){
+        stop("yu data error, the yu data must be input for truncated model when parameter tL or tR is not set.", call. = FALSE)
+      }
+    }
   }
 
   nq <- nrow(QTL)+1
@@ -178,47 +319,20 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
   cat(paste("chr", "cM", "LRT", "log.likelihood", "known QTL", "\n", sep = "\t")[console])
 
   if(method == "EM"){
-    meth <- function(D.matrix, cp.matrix, y, crit){
-      EM <- EM.MIM(D.matrix, cp.matrix, y, crit = crit, console = FALSE)
-      eff <- as.numeric(EM$E.vector)
-      mu0 <- as.numeric(EM$beta)
-      sigma <- sqrt(as.numeric(EM$variance))
-      LRT <- EM$LRT
-      like <- EM$log.likelihood
-      R2 <- EM$R2
-      result <- list(eff, mu0, sigma, LRT, like, R2)
-      return(result)
+    meth <- methEM
+    if(sele.g == "p" | sele.g == "f"){
+      ya <- c(y, yu)
+    } else {
+      ya <- y
     }
-  } else if (method == "REG"){
-    meth <- function(D.matrix, cp.matrix, y, crit){
-      X <- cp.matrix%*%D.matrix
-      fit <- stats::lm(y~X)
-      eff <- as.numeric(fit$coefficients[-1])
-      mu0 <- as.numeric(fit$coefficients[1])
-      ms <- stats::anova(fit)$`Mean Sq`
-      sigma <- ms[2]^0.5
-      R2 <- summary(fit)$r.squared
-
-      L0 <- c()
-      L1 <- c()
-      for(k in 1:nrow(cp0)){
-        L00 <- c()
-        L01 <- c()
-        for(m in 1:nrow(D.matrix)){
-          L00[m] <- cp0[k,m]*stats::dnorm((y[k]-mu0)/sigma)
-          L01[m] <- cp0[k,m]*stats::dnorm((y[k]-(mu0+D.matrix[m,]%*%eff))/sigma)
-        }
-        L0[k] <- sum(L00)
-        L1[k] <- sum(L01)
-      }
-
-      like0 <- sum(log(L0))
-      like1 <- sum(log(L1))
-      LRT <- 2*(like1-like0)
-
-      result <- list(eff, mu0, sigma, LRT, like1, R2)
-      return(result)
+  } else if (method=="REG"){
+    if(sele.g == "p" | sele.g == "f"){
+      ya <- c(y, yu)
+    } else {
+      ya <- y
     }
+
+    meth <- methSG
   }
 
   name0 <- cbind(paste("QTL", 1:(nq-1), ".ch", sep = ""), paste("QTL", 1:(nq-1), ".cM", sep = ""))
@@ -252,8 +366,7 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
     }
     for(j in QTLs0){
       QTL0 <- rbind(QTL, c(i,j))
-      cp0 <- Q.make(QTL0, marker, geno, type = type, ng = ng)$cp.matrix
-      fit0 <- meth(D.matrix, cp0, y, crit)
+      fit0 <- meth(QTL0, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, crit, cM, ya)
       effect0 <- c(t(QTL0), fit0[[1]], fit0[[4]], fit0[[5]], fit0[[6]])
 
       LRT0 <- round(effect0[length(effect0)-2], 3)
@@ -261,6 +374,7 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
       cat(paste(i, j, LRT0, like, knownQTL, "\n", sep = "\t")[console])
       effect <- rbind(effect, effect0)
     }
+    model <- fit0[[7]]
   }
   colnames(effect) <-  c(t(name0), colnames(D.matrix), "LRT", "log.likelihood", "R2")
   row.names(effect) <- 1:nrow(effect)
@@ -284,6 +398,9 @@ MIM.search <- function(QTL, marker, geno, y, method = "EM", type = "RI", D.matri
 
   effect.best <- best[-(1:(2*nq))]
 
-  result <- list(effect = effect, QTL.best = QTL.best, effect.best = effect.best)
+  inputdata <- list(marker = marker, geno = geno, y = y, yu = yu, sele.g = sele.g, type = type, ng = ng, cM = cM,
+                    D.matrix = D.matrix)
+
+  result <- list(effect = effect, QTL.best = QTL.best, effect.best = effect.best, model = model, inputdata = inputdata)
   return(result)
 }

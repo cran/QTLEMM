@@ -68,6 +68,11 @@
 #' or not.
 #' @param console logical. Determines whether the process of the algorithm
 #' will be displayed in the R console or not.
+#' @param IMresult list. The data list of the output from IM.search(). The
+#' required parameters for this function will be extracted from the data list.
+#' @param MIMresult list. The data list of the output from MIM.search() or
+#' MIM.points(). The required parameters for this function will be extracted
+#' from the data list.
 #'
 #' @return
 #' \item{E.vector}{The QTL effects are calculated by the EM algorithm.}
@@ -105,6 +110,9 @@
 #' \code{\link[QTLEMM]{D.make}}
 #' \code{\link[QTLEMM]{Q.make}}
 #' \code{\link[QTLEMM]{EM.MIM}}
+#' \code{\link[QTLEMM]{IM.search}}
+#' \code{\link[QTLEMM]{MIM.search}}
+#' \code{\link[QTLEMM]{MIM.points}}
 #'
 #' @examples
 #' # load the example data
@@ -114,12 +122,80 @@
 #' D.matrix <- D.make(3, type = "RI", aa = c(1, 3, 2, 3), dd = c(1, 2, 1, 3), ad = c(1, 2, 2, 3))
 #' result <- EM.MIMv(QTL, marker, geno, D.matrix, cp.matrix = NULL, y)
 #' result$EMvar
-EM.MIMv <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, type = "RI", ng = 2, cM = TRUE,
-                    E.vector0 = NULL, X = NULL, beta0 = NULL, variance0 = NULL, crit = 10^-5,
-                    stop = 1000, conv = TRUE, var.pos = TRUE, console = TRUE){
+EM.MIMv <- function(QTL = NULL, marker = NULL, geno = NULL, D.matrix = NULL, cp.matrix = NULL, y = NULL,
+                    type = "RI", ng = 2, cM = TRUE, E.vector0 = NULL, X = NULL, beta0 = NULL,
+                    variance0 = NULL, crit = 10^-5, stop = 1000, conv = TRUE, var.pos = TRUE,
+                    console = TRUE, IMresult = NULL, MIMresult = NULL){
+
+  if(!is.null(IMresult)){
+    check1 <- names(IMresult) == c("effect", "LRT.threshold", "detect.QTL", "model", "inputdata")
+    if(!is.list(IMresult) | sum(check1) != 5){
+      stop("IMresult data error, please input all of the original output data of IM.search().", call. = FALSE)
+    } else {
+      check2 <- names(IMresult$inputdata) == c("marker", "geno", "y", "yu", "sele.g", "type", "ng", "cM", "d.eff" )
+      if(!is.list(IMresult$inputdata) | sum(check2) != 9){
+        stop("IMresult data error, please input all of the original output data of IM.search().", call. = FALSE)
+      } else {
+        if(length(IMresult$inputdata$sele.g) != 0){
+          if(IMresult$inputdata$sele.g != "n"){
+            stop("IMresult data error, this function does not support selective genotyping data.", call. = FALSE)
+          }
+        }
+        if(is.data.frame(IMresult$detect.QTL) | is.matrix(IMresult$detect.QTL)){
+          QTL <- as.matrix(IMresult$detect.QTL[,1:2])
+        } else {stop("IMresult data error, please input all of the original output data of IM.search().", call. = FALSE)}
+        marker <- IMresult$inputdata$marker
+        geno <- IMresult$inputdata$geno
+        y <- IMresult$inputdata$y
+        type <- IMresult$inputdata$type
+        ng <- IMresult$inputdata$ng
+        cM <- IMresult$inputdata$cM
+        if(is.null(D.matrix)){
+          D.matrix <- D.make(nrow(QTL), type = type)
+          if(length(IMresult$inputdata$d.eff) != 0){
+            if(IMresult$inputdata$d.eff[1] == 0){
+              D.matrix <- D.make(nrow(QTL), type = type, d = 0)
+            }
+          }
+        }
+        cat("Use the output data of IM.search() for analysis. \n")
+        cat("If an error occurs, please check whether the original output data of IM.search() is used. \n")
+      }
+    }
+  } else if(!is.null(MIMresult)){
+    check1 <- names(MIMresult) == c("effect", "QTL.best", "effect.best", "model", "inputdata")
+    if(!is.list(MIMresult) | sum(check1) != 5){
+      stop("MIMresult data error, please input all of the original output data of MIM.search()/MIM.points().", call. = FALSE)
+    } else {
+      check2 <- names(MIMresult$inputdata) == c("marker", "geno", "y", "yu", "sele.g", "type", "ng", "cM", "D.matrix" )
+      if(!is.list(MIMresult$inputdata) | sum(check2) != 9){
+        stop("MIMresult data error, please input all of the original output data of MIM.search()/MIM.points().", call. = FALSE)
+      } else {
+        if(length(MIMresult$inputdata$sele.g) != 0){
+          if(length(MIMresult$inputdata$sele.g) != "n"){
+            stop("MIMresult data error, this function does not support selective genotyping data.", call. = FALSE)
+          }
+        }
+        if(is.data.frame(MIMresult$QTL.best) | is.matrix(MIMresult$QTL.best)){
+          QTL <- as.matrix(MIMresult$QTL.best[,1:2])
+        } else {stop("MIMresult data error, please input all of the original output data of MIM.search()/MIM.points().", call. = FALSE)}
+        marker <- MIMresult$inputdata$marker
+        geno <- MIMresult$inputdata$geno
+        y <- MIMresult$inputdata$y
+        type <- MIMresult$inputdata$type
+        ng <- MIMresult$inputdata$ng
+        cM <- MIMresult$inputdata$cM
+        if(is.null(D.matrix)){
+          D.matrix <- MIMresult$inputdata$D.matrix
+        }
+        cat("Use the output data of MIM.search()/MIM.points() for analysis. \n")
+        cat("If an error occurs, please check whether the original output data of MIM.search()/MIM.points() is used. \n")
+      }
+    }
+  }
 
   if(is.null(QTL) | is.null(marker) | is.null(geno) | is.null(D.matrix) | is.null(y)){
-    stop("Input data is missing, please cheak and fix", call. = FALSE)
+    stop("Input data is missing. The argument QTL, marker, geno, D.matrix, and y must be input.", call. = FALSE)
   }
 
   genotest <- table(c(geno))
@@ -132,7 +208,7 @@ EM.MIMv <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, type = "RI
   markertest <- c(ncol(marker) != 2, NA %in% marker, marker[,1] != sort(marker[,1]), nrow(marker) != ncol(geno))
   datatry <- try(marker*marker, silent=TRUE)
   if(class(datatry)[1] == "try-error" | TRUE %in% markertest){
-    stop("Marker data error, or the number of marker does not match the genetype data.", call. = FALSE)
+    stop("Marker data error, or the number of marker does not match the genotype data.", call. = FALSE)
   }
 
   QTL <- as.matrix(QTL)
@@ -193,7 +269,52 @@ EM.MIMv <- function(QTL, marker, geno, D.matrix, cp.matrix = NULL, y, type = "RI
     cp.matrix <- Q.make(QTL, marker, geno, type = type, ng = ng, interval = TRUE)$cp.matrix
   }
 
-  EM <- EM.MIM(D.matrix, cp.matrix, y, E.vector0, X, beta0, variance0, crit, stop, conv, console)
+  Y <- c(y)
+  ind <- length(Y)
+  g <- nrow(D.matrix)
+  eff <- ncol(D.matrix)
+
+  Y[is.na(Y)] <- mean(Y,na.rm = TRUE)
+
+  if(is.null(E.vector0)){E.vector0 <- rep(0, eff)}
+  if(is.null(X)){
+    X <- matrix(1, ind, 1)
+  } else if (is.vector(X)){
+    X <- matrix(X, length(X), 1)
+  }
+  if(is.null(beta0)){
+    beta0 <- matrix(rep(mean(Y), ncol(X)), ncol(X), 1)
+  } else if (is.numeric(beta)){
+    beta0 <- matrix(rep(beta, ncol(X)), ncol(X), 1)
+  }
+  if(is.null(variance0)){variance0 <- stats::var(c(Y))}
+  if(!console[1] %in% c(0,1) | length(console) > 1){console <- TRUE}
+  if(!conv[1] %in% c(0,1) | length(conv) > 1){conv <- TRUE}
+
+  datatry <- try(D.matrix%*%E.vector0, silent=TRUE)
+  if(class(datatry)[1] == "try-error" | NA %in% E.vector0){
+    stop("Parameter E.vector0 error, please check and fix.", call. = FALSE)
+  }
+
+  datatry <- try(Y%*%X%*%beta0, silent=TRUE)
+  if(class(datatry)[1] == "try-error" | NA %in% X | NA %in% beta0){
+    stop("Parameter X or bata0 error, please check and fix.", call. = FALSE)
+  }
+
+  if(!is.numeric(variance0) | length(variance0) > 1 | min(variance0) < 0){
+    stop("Parameter variance0 error, please input a positive number.", call. = FALSE)
+  }
+
+  if(!is.numeric(crit) | length(crit) > 1 | min(crit) <= 0 | max(crit) >= 1){
+    stop("Parameter crit error, please input a positive number between 0 and 1.", call. = FALSE)
+  }
+
+  if(!is.numeric(stop) | length(stop) > 1 | min(crit) <= 0){
+    stop = 1000
+    warning("Parameter stop error, adjust to 1000.")
+  }
+
+  EM <- EM.MIM0(D.matrix, cp.matrix, Y, E.vector0, X, beta0, variance0, crit, stop, conv, console)
   PI <- EM$PI.matrix
   sigma2 <- EM$variance
   E <- EM$E.vector

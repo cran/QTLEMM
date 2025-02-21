@@ -5,12 +5,12 @@
 \title{EM Algorithm for QTL MIM with Asymptotic Variance-Covariance Matrix}
 \usage{
 EM.MIMv(
-  QTL,
-  marker,
-  geno,
-  D.matrix,
+  QTL = NULL,
+  marker = NULL,
+  geno = NULL,
+  D.matrix = NULL,
   cp.matrix = NULL,
-  y,
+  y = NULL,
   type = "RI",
   ng = 2,
   cM = TRUE,
@@ -22,7 +22,9 @@ EM.MIMv(
   stop = 1000,
   conv = TRUE,
   var.pos = TRUE,
-  console = TRUE
+  console = TRUE,
+  IMresult = NULL,
+  MIMresult = NULL
 )
 }
 \arguments{
@@ -106,6 +108,13 @@ or not.}
 
 \item{console}{logical. Determines whether the process of the algorithm
 will be displayed in the R console or not.}
+
+\item{IMresult}{list. The data list of the output from IM.search(). The
+required parameters for this function will be extracted from the data list.}
+
+\item{MIMresult}{list. The data list of the output from MIM.search() or
+MIM.points(). The required parameters for this function will be extracted
+from the data list.}
 }
 \value{
 \item{E.vector}{The QTL effects are calculated by the EM algorithm.}
@@ -155,4 +164,7 @@ for Quantitative Trait Loci. Genetics 152: 1203-1216. <doi: 10.1093/genetics/152
 \code{\link[QTLEMM]{D.make}}
 \code{\link[QTLEMM]{Q.make}}
 \code{\link[QTLEMM]{EM.MIM}}
+\code{\link[QTLEMM]{IM.search}}
+\code{\link[QTLEMM]{MIM.search}}
+\code{\link[QTLEMM]{MIM.points}}
 }

@@ -1,7 +1,8 @@
 #' QTL search by IM
 #'
 #' Expectation-maximization algorithm for QTL interval mapping to search
-#' for possible position of QTL in all chromosomes.
+#' for possible positions of QTL in all chromosomes. It can handle genotype
+#' data which is selective genotyping too.
 #'
 #' @param marker matrix. A k*2 matrix contains the marker information,
 #' where the row dimension 'k' represents the number of markers in the
@@ -13,8 +14,27 @@
 #' for n individuals. The marker genotypes of P1 homozygote (MM),
 #' heterozygote (Mm), and P2 homozygote (mm) are coded as 2, 1, and 0,
 #' respectively, with NA indicating missing values.
-#' @param y vector. A vector with n elements contains the phenotype values
-#' of individuals.
+#' @param y vector. A vector that contains the phenotype values of
+#' individuals with genotypes.
+#' @param yu vector. A vector that contains the phenotype values of
+#' individuals without genotypes.
+#' @param sele.g character. Determines the type of data being analyzed:
+#' If sele.g="n", it considers the data as complete genotyping data. If
+#' sele.g="f", it treats the data as selective genotyping data and utilizes
+#' the proposed corrected frequency model (Lee 2014) for analysis; If
+#' sele.g="t", it considers the data as selective genotyping data and uses
+#' the truncated model (Lee 2014) for analysis; If sele.g="p", it treats
+#' the data as selective genotyping data and uses the population
+#' frequency-based model (Lee 2014) for analysis. Note that the 'yu'
+#' argument must be provided when sele.g="f" or "p".
+#' @param tL numeric. The lower truncation point of phenotype value when
+#' sele.g="t". When sele.g="t" and tL=NULL, the 'yu' argument must be
+#' provided. In this case, the function will consider the minimum of 'yu'
+#' as the lower truncation point.
+#' @param tR numeric. The upper truncation point of phenotype value when
+#' sele.g="t". When sele.g="t" and tR=NULL, the 'yu' argument must be
+#' provided. In this case, the function will consider the maximum of 'yu'
+#' as the upper truncation point.
 #' @param method character. When method="EM", it indicates that the interval
 #' mapping method by Lander and Botstein (1989) is used in the analysis.
 #' Conversely, when method="REG", it indicates that the approximate regression
@@ -44,8 +64,8 @@
 #' Alternatively, users can input a numerical value as the LRT threshold to
 #' evaluate the significance of QTL detection.
 #' @param simu integer. Determines the number of simulation samples that
-#' will be used to compute the LRT threshold using the Gaussian process.
-#' It must be a value between 50 and 10^8.
+#' will be used to compute the LRT (Likelihood Ratio Test) threshold using
+#' the Gaussian process. It must be a value between 50 and 10^8.
 #' @param alpha numeric. The type I error rate for the LRT threshold.
 #' @param detect logical. Determines whether the significant QTL, whose LRT
 #' statistic is larger than the LRT threshold, will be displayed in the
@@ -61,10 +81,14 @@
 #'
 #' @return
 #' \item{effect}{The estimated effects and LRT statistics of all positions.}
-#' \item{LRT.threshold}{The LRT threshold value is computed for the data using
-#' the Gaussian stochastic process (Kuo 2011; Kao and Ho 2012).}
-#' \item{detect.QTL}{The positions, effects, and LRT statistics of the detected
-#' QTL are significant using the obtained LRT threshold value.}
+#' \item{LRT.threshold}{The LRT threshold value computed for the data using the
+#' Gaussian stochastic process (Kuo 2011; Kao and Ho 2012).}
+#' \item{detect.QTL}{The positions, effects and LRT statistics of the detected
+#' QTL significant using the obtained LRT threshold value.}
+#' \item{model}{The model of selective genotyping data in this analyze.}
+#' \item{inputdata}{The input data of this analysis. It contains marker, geno,
+#' y, yu, sele.g, type, ng, cM, and d.eff. The parameters not provided by the
+#' user will be output with default values.}
 #'
 #' Graphical outputs including LOD value and effect of each position.
 #'
@@ -79,47 +103,95 @@
 #' KAO, C.-H., Z.-B. ZENG and R. D. TEASDALE 1999 Multiple interval mapping
 #' for Quantitative Trait Loci. Genetics 152: 1203-1216. <doi: 10.1093/genetics/152.3.1203>
 #'
+#' H.-I LEE, H.-A. HO and C.-H. KAO 2014 A new simple method for improving
+#' QTL mapping under selective genotyping. Genetics 198: 1685-1698. <doi: 10.1534/genetics.114.168385.>
+#'
 #' KAO, C.-H. and H.-A. Ho 2012 A score-statistic approach for determining
 #' threshold values in QTL mapping. Frontiers in Bioscience. E4, 2670-2682. <doi: 10.2741/e582>
 #'
 #' @seealso
 #' \code{\link[QTLEMM]{EM.MIM}}
-#' \code{\link[QTLEMM]{IM.search2}}
 #' \code{\link[QTLEMM]{LRTthre}}
 #'
 #' @examples
+#'
 #' # load the example data
 #' load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
 #'
 #' # run and result
 #' result <- IM.search(marker, geno, y, type = "RI", ng = 2, speed = 7, crit = 10^-3, LRT.thre = 10)
 #' result$detect.QTL
-IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NULL, ng = 2, cM = TRUE,
-                      speed = 1, crit = 10^-5, d.eff = FALSE, LRT.thre = TRUE, simu = 1000, alpha = 0.05,
-                      detect = TRUE, QTLdist = 15, plot.all = TRUE, plot.chr = TRUE, console = TRUE){
+#'
+#' \dontrun{
+#' # Example for selective genotyping data
+#' # load the example data
+#' load(system.file("extdata", "exampledata.RDATA", package = "QTLEMM"))
+#'
+#' # make the seletive genotyping data
+#' ys <- y[y > quantile(y)[4] | y < quantile(y)[2]]
+#' yu <- y[y >= quantile(y)[2] & y <= quantile(y)[4]]
+#' geno.s <- geno[y > quantile(y)[4] | y < quantile(y)[2],]
+#'
+#' # run and result
+#' result <- IM.search(marker, geno.s, ys, yu, sele.g = "f", type = "RI", ng = 2,
+#' speed = 7, crit = 10^-3, LRT.thre = 10)
+#' result$detect.QTL
+#' }
+#'
+IM.search <- function(marker, geno, y, yu = NULL, sele.g = "n", tL = NULL, tR = NULL, method = "EM",
+                      type = "RI", D.matrix = NULL, ng = 2, cM = TRUE, speed = 1, crit = 10^-5,
+                      d.eff = FALSE, LRT.thre = TRUE, simu = 1000, alpha = 0.05, detect = TRUE,
+                      QTLdist = 15, plot.all = TRUE, plot.chr = TRUE, console = TRUE){
 
   if(is.null(marker) | is.null(geno) | is.null(y)){
-    stop("Input data is missing, please cheak and fix", call. = FALSE)
+    stop("Input data is missing. The argument marker, geno, and y must be input.", call. = FALSE)
   }
 
-  genotest <- table(geno)
+  genotest <- table(c(geno))
   datatry <- try(geno*geno, silent=TRUE)
-  if(class(datatry)[1] == "try-error" | FALSE%in%(names(genotest)%in%c(0, 1, 2))  | !is.matrix(geno)){
+  if(class(datatry)[1] == "try-error" | FALSE %in% (names(genotest) %in% c(0, 1, 2))  | length(dim(geno)) != 2){
     stop("Genotype data error, please cheak your genotype data.", call. = FALSE)
   }
 
   marker <- as.matrix(marker)
-  markertest <- c(ncol(marker) != 2, NA%in%marker, marker[,1] != sort(marker[,1]), nrow(marker) != ncol(geno))
+  markertest <- c(ncol(marker) != 2, NA %in% marker, marker[,1] != sort(marker[,1]), nrow(marker) != ncol(geno))
   datatry <- try(marker*marker, silent=TRUE)
-  if(class(datatry)[1] == "try-error" | TRUE%in%markertest){
-    stop("Marker data error, or the number of marker does not match the genetype data.", call. = FALSE)
+  if(class(datatry)[1] == "try-error" | TRUE %in% markertest){
+    stop("Marker data error, or the number of marker does not match the genotype data.", call. = FALSE)
   }
 
   y[is.na(y)] <- mean(y,na.rm = TRUE)
 
+  if(!is.null(yu)){
+    yu <- yu[!is.na(yu)]
+    datatry <- try(yu%*%yu, silent=TRUE)
+    if(class(datatry)[1] == "try-error"){
+      stop("yu data error, please check your yu data.", call. = FALSE)
+    }
+  }
+
+  y <- c(y)
   datatry <- try(y%*%geno, silent=TRUE)
   if(class(datatry)[1] == "try-error"){
     stop("Phenotype data error, or the number of individual does not match the genetype data.", call. = FALSE)
+  }
+
+  if(!sele.g[1] %in% c("n", "t", "p", "f") | length(sele.g)!=1){
+    stop("Parameter sele.g error, please check and fix.", call. = FALSE)
+  }
+
+  if(sele.g == "t"){
+    lrtest <- c(tL[1] < min(c(y,yu)), tR[1] > max(c(y,yu)), tR[1] < tL[1],
+                length(tL) > 1, length(tR) > 1)
+    datatry <- try(tL[1]*tR[1], silent=TRUE)
+    if(class(datatry)[1] == "try-error" | TRUE %in% lrtest){
+      stop("Parameter tL or tR error, please check and fix.", call. = FALSE)
+    }
+    if(is.null(tL) | is.null(tR)){
+      if(is.null(yu)){
+        stop("yu data error, the yu data must be input for truncated model when parameter tL or tR is not set.", call. = FALSE)
+      }
+    }
   }
 
   if(!method[1] %in% c("EM","REG") | length(method) > 1){method <- "EM"}
@@ -174,7 +246,7 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   if(!detect[1] %in% c(0,1) | length(detect > 1)){detect <- TRUE}
 
   if(!is.numeric(QTLdist) | length(QTLdist) > 1 | min(QTLdist) < speed*2){
-    stop("Parameter QTLdist error, please input a bigger positive number.", call. = FALSE)
+    stop("Parameter QTLdist error, please input a more suitable positive number.", call. = FALSE)
   }
 
   if(!plot.all[1] %in% c(0,1) | length(plot.all) > 1){plot.all <- TRUE}
@@ -204,27 +276,20 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   }
 
   if(method == "EM"){
-    meth <- function(D.matrix, cp.matrix, y, crit){
-      EM <- EM.MIM(D.matrix, cp.matrix, y, crit = crit, console = FALSE)
-      eff <- as.numeric(EM$E.vector)
-      mu0 <- as.numeric(EM$beta)
-      sigma <- sqrt(as.numeric(EM$variance))
-      R2 <- EM$R2
-      result <- list(eff, mu0, sigma, R2)
-      return(result)
+    meth <- methEM
+    if(sele.g == "p" | sele.g == "f"){
+      ya <- c(y, yu)
+    } else {
+      ya <- y
     }
-  } else if (method == "REG"){
-    meth <- function(D.matrix, cp.matrix, y, crit){
-      X <- cp.matrix%*%D.matrix
-      fit <- stats::lm(y~X)
-      eff <- as.numeric(fit$coefficients[-1])
-      mu0 <- as.numeric(fit$coefficients[1])
-      ms <- stats::anova(fit)$`Mean Sq`
-      sigma <- ms[2]^0.5
-      R2 <- summary(fit)$r.squared
-      result <- list(eff, mu0, sigma, R2)
-      return(result)
+  } else if (method=="REG"){
+    if(sele.g == "p" | sele.g == "f"){
+      ya <- c(y, yu)
+    } else {
+      ya <- y
     }
+
+    meth <- methSG
   }
 
   cat(paste("chr", "cM", "LRT", "\n", sep = "\t")[console])
@@ -232,32 +297,18 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   cr0 <- unique(marker[, 1])
   for(i in cr0){
     cr <- marker[marker[, 1] == i,]
-    minpos <- min(cr[, 2])+speed
-    if(speed%%1 == 0){minpos = ceiling(floor(min(cr[, 2]))+speed)}
-    for(j in seq(minpos, (max(cr[,2])), speed)){
-      Q.matrix <- Q.make(matrix(c(i, j), 1, 2), marker, geno, type = type, ng = ng)
-      cp.matrix <- Q.matrix$cp.matrix
+    minpos <- min(cr[, 2])
+    if(speed%%1 == 0){minpos = ceiling(min(cr[, 2]))}
+    for(j in seq(minpos, (max(cr[, 2])), speed)){
+      QTL <- matrix(c(i, j), 1, 2)
 
-      result <- meth(D.matrix, cp.matrix, y, crit)
+      result <- meth(QTL, marker, geno, D.matrix, y, yu, tL, tR, type, ng, sele.g, crit, cM, ya)
       eff <- result[[1]]
       mu0 <- result[[2]]
       sigma <- result[[3]]
-      R2 <- result[[4]]
-
-      L0 <- c()
-      L1 <- c()
-      for(k in 1:nrow(cp.matrix)){
-        L00 <- c()
-        L01 <- c()
-        for(m in 1:nrow(D.matrix)){
-          L00[m] <- cp.matrix[k,m]*stats::dnorm((y[k]-mu0)/sigma)
-          L01[m] <- cp.matrix[k,m]*stats::dnorm((y[k]-(mu0+D.matrix[m,]%*%eff))/sigma)
-        }
-        L0[k] <- sum(L00)
-        L1[k] <- sum(L01)
-      }
-
-      LRT <- -2*sum(log(L0[!is.na(L0) & !is.na(L1)]/L1[!is.na(L0) & !is.na(L1)]))
+      LRT <- result[[4]]
+      R2 <- result[[6]]
+      model <- result[[7]]
 
       eff0 <- c(i, j, eff, LRT, R2)
       effect <- rbind(effect, eff0)
@@ -268,6 +319,7 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
   colnames(effect) <- c("chr", "cM", colnames(D.matrix), "LRT", "R2")
   effect <- data.frame(effect)
   effect[effect[, ncol(effect)] == Inf & !is.na(effect[, ncol(effect)]), 3:ncol(effect)] <- 0
+
 
   LRT.threshold <- NULL
   if(LRT.thre == TRUE){
@@ -288,22 +340,21 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
       detcr <- rep(0, nrow(LRTcr))
       if(sum(LRTcr[, 2]) > 0){
         for(j in 1:nrow(LRTcr)){
-          LRTdet <- LRTcr[LRTcr[, 1] >= max(c(min(LRTcr[, 1]), LRTcr[j, 1]-QTLdist)) &
+          LRTdet <- LRTcr[LRTcr[,1 ] >= max(c(min(LRTcr[, 1]), LRTcr[j, 1]-QTLdist)) &
                             LRTcr[, 1] <= min(c(max(LRTcr[, 1]), LRTcr[j, 1]+QTLdist)), 2]
           LRT0 <- LRTcr[j, 2]
-          if(LRT0 == max(LRTdet) & LRT0 > 0){
-            detcr[j] <- 1
+          if(LRT0 == max(LRTdet) & LRT0 > 0){detcr[j] <- 1
           } else {detcr[j] <- 0}
         }
       }
-      det0 <- c(det0,detcr)
+      det0 <- c(det0, detcr)
     }
     detect.QTL <- effect[det0 == 1,]
-    return(detect.QTL)
+    detect.QTL
   }
 
   detect.QTL <- NULL
-  if(detect & is.numeric(LRT.threshold)){
+  if(detect == TRUE & is.numeric(LRT.threshold)){
     detect.QTL <- detectQTL(effect, LRT.threshold, QTLdist)
   }
 
@@ -319,13 +370,14 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
       graphics::par(fig = c(0, 1, 0.35, 1))
       plot(effect[effect$chr == k,]$cM, effect[effect$chr == k,]$LRT, main = "", ylab = "LRT statistic",
            xlab = "", type = "l", ylim = c(0, max(c(effect$LRT, LRT.threshold), na.rm = TRUE)), bty = "l")
-      if(!is.null(LRT.threshold)){graphics::abline(h = LRT.threshold, col = "red", lwd = 2)}
+      if(!is.null(LRT.threshold)){
+        graphics::abline(h = LRT.threshold, col = "red", lwd = 2)
+      }
       graphics::par(mar = c(2, 5, 4, 2))
       graphics::par(fig = c(0, 1, 0, 0.45), new = TRUE)
-      plot(effect[effect$chr == k,]$cM, effect[effect$chr == k,]$a1, ylab = "effect",
-           main = paste("Chromosome", k), xlab = "", type = "l",
-           ylim = c(min(c(effect$a1,0), na.rm = TRUE)*1.4, max(c(effect$a1, 0), na.rm = TRUE)*1.2), xaxt = "n", bty = "n")
-      graphics::abline(h = 0, col = "black", lwd = 2)
+      plot(effect[effect$chr == k,]$cM, effect[effect$chr == k,]$a1, ylab = "effect", main = paste("Chromosome", k),
+           xlab = "", type = "l", ylim = c(min(c(effect$a1, 0), na.rm = TRUE)*1.4, max(c(effect$a1, 0), na.rm = TRUE)*1.2), xaxt = "n", bty = "n")
+      graphics::abline(h=0,col="black",lwd=2)
     }
   }
   if(plot.all & nc0 > 1){
@@ -335,10 +387,13 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
 
     lcr <- c(0, cumsum(ncr))
     x0 <- c()
+    s0 <- c()
     cut0 <- (max(lcr)*speed/length(lcr)/5)*(cr0-1)
     xn <- 0
     for(i in 1:length(ncr)){
-      x0 <- c(x0, seq(speed, ncr[i]*speed, speed)+lcr[i]*speed+cut0[i])
+      x1 <- seq(speed, ncr[i]*speed, speed)+lcr[i]*speed+cut0[i]
+      x0 <- c(x0, x1)
+      s0 <- c(s0, seq(min(x1), max(x1), 1))
       xn <- c(xn, length(x0))
     }
     xn1 <- (lcr[-1]-ncr/2)*speed+cut0
@@ -353,7 +408,11 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
     graphics::axis(2, seq(0, yli*1.2, 5))
     graphics::axis(1, cr0, at = xn1, cex = 1.2, tick = FALSE)
     lse <- 4000/max(x0)
-    graphics::segments(x0, rep(-yli/10, length(x0)), x0, rep(-yli/5, length(x0)), lwd = lse)
+    if(speed < 1){
+      s0 <- x0
+    }
+    graphics::segments(s0, rep(-yli/10, length(s0)), s0, rep(-yli/5, length(s0)), lwd = lse)
+
 
     graphics::par(mar = c(2, 5, 4, 2))
     graphics::par(fig = c(0, 1, 0, 0.5), new = TRUE)
@@ -362,11 +421,14 @@ IM.search <- function(marker, geno, y, method = "EM", type = "RI", D.matrix = NU
     graphics::abline(h = 0, col = "blue", lwd = 2)
     for(k in 1:(length(xn)-1)){
       graphics::points(x0[(xn[k]+1):xn[k+1]], effect$a1[(xn[k]+1):xn[k+1]], main = "", ylab = "effect",
-                       xlab = "", type = "l", ylim = c(min(c(effect$a1, 0), na.rm = TRUE)*1.2, max(c(effect$a1, 0), na.rm = TRUE)*1.2),
+                       xlab = "", type = "l", ylim = c(min(c(effect$a1, 0), na.rm = TRUE)*1.2, max(c(effect$a1, 0))*1.2),
                        xaxt = "n", bty = "n")
     }
   }
 
-  result <- list(effect = effect, LRT.threshold = LRT.threshold, detect.QTL = detect.QTL)
+  inputdata <- list(marker = marker, geno = geno, y = y, yu = yu, sele.g = sele.g, type = type, ng = ng, cM = cM,
+                    d.eff = d.eff)
+
+  result <- list(effect = effect, LRT.threshold = LRT.threshold, detect.QTL = detect.QTL, model = model, inputdata = inputdata)
   return(result)
 }
