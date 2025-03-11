@@ -341,7 +341,7 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
           cat(paste(paste("BC", nG, "\t"), cr, i, "\n", sep = "\t")[console])
         }
       }
-      cat(paste(paste("BC", nG, "\t"), cr, i, "\n", sep = "\t")[console])
+      cat(paste(paste("BC", nG, "\t"), cr, "done", "\n", sep = "\t")[console])
 
       Ds <- seq(0, D, speed)
       Dsc0 <- cumsum(d)
@@ -1030,7 +1030,7 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
         }
       }
       return(TS)
-      cat(paste(paste("RI F", nG, " ad   ", sep = ""), cr, j, "\n", sep = "\t")[console])
+      cat(paste(paste("RI F", nG, " ad   ", sep = ""), cr, "done", "\n", sep = "\t")[console])
     }
 
     if(!d.eff){
@@ -1110,7 +1110,7 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
             cat(paste(paste("RI F", nG, " a   ", sep = ""), cr, j, "\n", sep = "\t")[console])
           }
         }
-        cat(paste(paste("RI F", nG, " a   ", sep = ""), cr, j, "\n", sep = "\t")[console])
+        cat(paste(paste("RI F", nG, " a   ", sep = ""), cr, "done", "\n", sep = "\t")[console])
         return(TS)
       }
     }
@@ -1474,7 +1474,7 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
           cat(paste(paste("AI F", nG, " ad   ", sep = ""), cr, j, "\n", sep = "\t")[console])
         }
       }
-      cat(paste(paste("AI F", nG, " ad   ", sep = ""), cr, j, "\n", sep = "\t")[console])
+      cat(paste(paste("AI F", nG, " ad   ", sep = ""), cr, "done", "\n", sep = "\t")[console])
       return(TS)
     }
 
@@ -1555,7 +1555,7 @@ LRTthre <- function(marker, type = "RI", ng = 2, cM = TRUE, ns = 200, gv = 25,
             cat(paste(paste("AI F", nG, " a   ", sep = ""), cr, j, "\n", sep = "\t")[console])
           }
         }
-        cat(paste(paste("AI F", nG, " a   ", sep = ""), cr, j, "\n", sep = "\t")[console])
+        cat(paste(paste("AI F", nG, " a   ", sep = ""), cr, "done", "\n", sep = "\t")[console])
         return(TS)
       }
     }
